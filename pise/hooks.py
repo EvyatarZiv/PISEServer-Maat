@@ -25,6 +25,40 @@ class SendReceiveCallSite:
         raise NotImplementedError()
 
 
+class SendHook:
+    SEND_STRING = 'SEND'
+
+    def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
+        # super().__init__(**kwargs) Not clear what the maat equivalent of the old super is...
+        self.callsite_handler = callsite_handler
+
+    def execute_callback(self, engine: maat.MaatEngine):
+        buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
+        buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
+        length = length_arg.as_uint(ctx=engine.solver.get_model())
+        logger.debug('Send hook with %d bytes, buff = %s' % (length, buffer_addr))
+
+        if engine.inputs[engine.idx].type != SendHook.SEND_STRING:
+            return maat.ACTION.HALT
+
+        message_type = engine.inputs[engine.idx]
+        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
+        for (offset, value) in message_type.predicate.items():
+            offset = int(offset)
+            value = int(value)
+            if offset >= length:
+                return maat.ACTION.HALT
+            symb_byte = engine.mem.read(buffer_addr + offset, 1)
+            engine.solver.add(symb_byte == value)
+
+        if not engine.solver.check():
+            return maat.ACTION.HALT
+        return maat.ACTION.CONTINUE
+
+    def make_callback(self):
+        return lambda engine: self.execute_callback(engine)
+
+
 class RecvHook:
     RECEIVE_STRING = 'RECEIVE'
 
