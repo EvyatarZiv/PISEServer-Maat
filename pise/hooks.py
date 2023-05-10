@@ -1,6 +1,4 @@
 import logging
-
-from angr import SimProcedure
 import maat
 
 logger = logging.getLogger(__name__)
@@ -43,7 +41,11 @@ class RecvHook:
             return maat.ACTION.HALT
         message_type = engine.inputs[engine.idx]
         conc_buffer_name = engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
-        for (offset, value) in message_type.predicate:
+        for (k, v) in message_type.predicate:
+            offset = int(k)
+            value = int(v)
+            if offset >= length:
+                return maat.ACTION.HALT  # Received message isn't long enough to match type
             symb_byte = engine.mem.read(buffer_addr+offset, 1)
             engine.solver.add(symb_byte == value)
         return maat.ACTION.CONTINUE

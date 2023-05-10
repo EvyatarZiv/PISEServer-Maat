@@ -61,5 +61,6 @@ class QueryRunner:
             self.engine.inputs = inputs
         if not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
+        return True, None, 0, 0, 0  # TODO: Add probing
 
 
