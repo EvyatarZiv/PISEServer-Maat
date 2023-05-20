@@ -36,10 +36,11 @@ class SendHook:
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
         buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
         length = length_arg.as_uint(ctx=engine.solver.get_model())
-        logger.debug('Send hook with %d bytes, buff = %s' % (length, buffer_addr))
 
         if engine.inputs[engine.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
+
+        logger.debug('Send hook with %d bytes, buff = %s' % (length, buffer_addr))
 
         message_type = engine.inputs[engine.idx]
         engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
@@ -53,6 +54,7 @@ class SendHook:
 
         if not engine.solver.check():
             return maat.ACTION.HALT
+        engine.idx += 1
         return maat.ACTION.CONTINUE
 
     def make_callback(self):
@@ -68,20 +70,25 @@ class RecvHook:
 
     def execute_callback(self, engine: maat.MaatEngine):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
-        length = length_arg.as_uint(ctx=engine.solver.get_model())
         buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
-        logger.debug('Receive hook with %d bytes, buff = %s' % (length, buffer_addr))
+        length = length_arg.as_uint(ctx=engine.solver.get_model())
+
         if engine.inputs[engine.idx].type != RecvHook.RECEIVE_STRING:
             return maat.ACTION.HALT
+
+        logger.debug('Receive hook with %d bytes, buff = %s' % (length, buffer_addr))
+
         message_type = engine.inputs[engine.idx]
-        conc_buffer_name = engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
-        for (k, v) in message_type.predicate:
-            offset = int(k)
-            value = int(v)
+        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
+        for (offset, value) in message_type.predicate.items():
+            offset = int(offset)
+            value = int(value)
             if offset >= length:
                 return maat.ACTION.HALT  # Received message isn't long enough to match type
             symb_byte = engine.mem.read(buffer_addr+offset, 1)
             engine.solver.add(symb_byte == value)
+
+        engine.idx += 1
         return maat.ACTION.CONTINUE
 
     def make_callback(self):
