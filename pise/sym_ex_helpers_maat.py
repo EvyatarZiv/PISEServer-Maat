@@ -3,8 +3,10 @@ import time
 import maat
 from copy import deepcopy
 
+m = maat.MaatEngine(maat.ARCH.X64)
 
-class PISEEngine(maat.MaatEngine):
+
+class PISEEngine(type(m)):
     def __init__(self, inputs, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.inputs = inputs

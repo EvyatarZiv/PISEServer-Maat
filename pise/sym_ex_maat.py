@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sym_ex_helpers_maat
+from pise import sym_ex_helpers_maat
 import logging
 import time
 import maat

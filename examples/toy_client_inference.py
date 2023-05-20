@@ -1,6 +1,6 @@
 import logging
 
-from pise import sym_execution, server, hooks
+from pise import sym_ex_maat, server, hooks
 import maat
 
 START_ADDRESS=0x0
@@ -29,7 +29,7 @@ class ToyRecvHook(hooks.SendReceiveCallSite):
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
     # logging.getLogger('angr').setLevel(logging.INFO)
-    query_runner = sym_execution.QueryRunner('examples/toy_example/toy_example', [ToySendHook(), ToyRecvHook()])
+    query_runner = sym_ex_maat.QueryRunner('examples/toy_example/toy_example', [ToySendHook(), ToyRecvHook()])
     s = server.Server(query_runner)
     s.listen()
 
