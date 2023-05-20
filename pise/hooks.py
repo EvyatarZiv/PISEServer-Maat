@@ -1,5 +1,6 @@
 import logging
 import maat
+from pise import sym_ex_helpers_maat
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ class SendReceiveCallSite:
     # This function should set the hook within the symbolic execution engine
     # In our case it gets the angr project with the executable loaded
     # Return value is ignored
-    def set_hook(self, angr_project):
+    def set_hook(self, maat_engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         raise NotImplementedError()
 
     # This function should extract the buffer pointer and the buffer length from the program state
@@ -25,25 +26,17 @@ class SendReceiveCallSite:
         raise NotImplementedError()
 
 
-class SendHook:
-    SEND_STRING = 'SEND'
-
-    def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
-        # super().__init__(**kwargs) Not clear what the maat equivalent of the old super is...
+class NetHook:
+    def __init__(self, callsite_handler: SendReceiveCallSite):
         self.callsite_handler = callsite_handler
 
-    def execute_callback(self, engine: maat.MaatEngine):
+    def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
         buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
         length = length_arg.as_uint(ctx=engine.solver.get_model())
 
-        if engine.inputs[engine.idx].type != SendHook.SEND_STRING:
-            return maat.ACTION.HALT
-
-        logger.debug('Send hook with %d bytes, buff = %s' % (length, buffer_addr))
-
-        message_type = engine.inputs[engine.idx]
-        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
+        message_type = pise_attr.inputs[pise_attr.idx]
+        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
         for (offset, value) in message_type.predicate.items():
             offset = int(offset)
             value = int(value)
@@ -51,48 +44,41 @@ class SendHook:
                 return maat.ACTION.HALT
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
             engine.solver.add(symb_byte == value)
-
-        if not engine.solver.check():
-            return maat.ACTION.HALT
-        engine.idx += 1
+        pise_attr.idx += 1
         return maat.ACTION.CONTINUE
 
-    def make_callback(self):
-        return lambda engine: self.execute_callback(engine)
+
+class SendHook(NetHook):
+    SEND_STRING = 'SEND'
+
+    def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
+        super().__init__(callsite_handler)
+
+    def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
+            return maat.ACTION.HALT
+        action = self.execute_net_callback(engine,pise_attr)
+        if action == maat.ACTION.HALT or not engine.solver.check():
+            return maat.ACTION.HALT
+        return maat.ACTION.CONTINUE
+
+    def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        return lambda engine: self.execute_callback(engine, pise_attr)
 
 
-class RecvHook:
+class RecvHook(NetHook):
     RECEIVE_STRING = 'RECEIVE'
 
     def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
-        # super().__init__(**kwargs) Not clear what the maat equivalent of the old super is...
-        self.callsite_handler = callsite_handler
+        super().__init__(callsite_handler)
 
-    def execute_callback(self, engine: maat.MaatEngine):
-        buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
-        buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
-        length = length_arg.as_uint(ctx=engine.solver.get_model())
-
+    def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if engine.inputs[engine.idx].type != RecvHook.RECEIVE_STRING:
             return maat.ACTION.HALT
+        return self.execute_net_callback(engine, pise_attr)
 
-        logger.debug('Receive hook with %d bytes, buff = %s' % (length, buffer_addr))
-
-        message_type = engine.inputs[engine.idx]
-        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % engine.idx)
-        for (offset, value) in message_type.predicate.items():
-            offset = int(offset)
-            value = int(value)
-            if offset >= length:
-                return maat.ACTION.HALT  # Received message isn't long enough to match type
-            symb_byte = engine.mem.read(buffer_addr+offset, 1)
-            engine.solver.add(symb_byte == value)
-
-        engine.idx += 1
-        return maat.ACTION.CONTINUE
-
-    def make_callback(self):
-        return lambda engine: self.execute_callback(engine)
+    def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        return lambda engine: self.execute_callback(engine, pise_attr)
 
 
 class AsyncHook:

@@ -13,32 +13,36 @@ LIB64_PATH = ""  # TODO: Add path to lib64
 class QueryRunner:
     def __init__(self, file, callsites_to_monitor):
         self.file = file
-        self.engine = sym_ex_helpers_maat.PISEEngine(None, maat.ARCH.X64, maat.OS.LINUX)
+        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
+        self.pise_attr = None
         self.mode = None
         self.callsites_to_monitor = callsites_to_monitor
-        self.set_membership_hooks()
 
     def set_membership_hooks(self) -> None:
         if self.mode == 'membership':
             return
         logger.info('Setting hooks')
         for callsite in self.callsites_to_monitor:
-            callsite.set_hook(self.engine)
+            callsite.set_hook(self.engine, self.pise_attr)
         self.mode = 'membership'
 
     def do_monitoring(self) -> bool:
         while True:
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
-                if not self.engine.pop_engine_state():
+                terminated, next_state = self.pise_attr.pop_engine_state()
+                if not terminated:
                     return False  # Membership is false
+                self.engine = next_state
                 continue
             elif stop_res == maat.STOP.HOOK:
-                if self.engine.idx == len(self.engine.inputs):
+                if self.pise_attr.idx == len(self.pise_attr.inputs):
                     return True  # Membership is true
                 else:
-                    if not self.engine.pop_engine_state():
+                    terminated, next_state = self.pise_attr.pop_engine_state()
+                    if not terminated:
                         return False  # Membership is false
+                    self.engine = next_state
                     continue
             else:
                 raise NotImplementedError
@@ -49,7 +53,9 @@ class QueryRunner:
         """
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
-        self.set_membership_hooks()  # TODO: Will be implemented later on
+        self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
+        self.engine.hooks.add(maat.EVENT.BRANCH,maat.WHEN.BEFORE,callbacks=[self.pise_attr.make_branch_callback()])
+        self.set_membership_hooks()
         if False:
             # Cache, as of yet unimplemented
             raise NotImplementedError
