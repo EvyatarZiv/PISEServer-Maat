@@ -1,13 +1,13 @@
 import logging
 
 from pise import sym_execution, server, hooks
+import maat
 
-
+START_ADDRESS=0x0
 class ToySendHook(hooks.SendReceiveCallSite):
 
     def set_hook(self, p):
-        #p.hook_symbol('send', hooks.SendHook(self))
-        pass
+        p.hooks.add(maat.EVENT.EXEC,maat.WHEN.BEFORE,0x1134+START_ADDRESS)
 
     def extract_arguments(self, call_context):
         length = call_context.cpu.rdx
@@ -18,8 +18,7 @@ class ToySendHook(hooks.SendReceiveCallSite):
 class ToyRecvHook(hooks.SendReceiveCallSite):
 
     def set_hook(self, p):
-        #p.hook_symbol('recv', hooks.RecvHook(self))
-        pass
+        p.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, 0x1174 + START_ADDRESS)
 
     def extract_arguments(self, call_context):
         length = call_context.cpu.rdx
