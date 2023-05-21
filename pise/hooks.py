@@ -4,9 +4,11 @@ from pise import sym_ex_helpers_maat
 
 logger = logging.getLogger(__name__)
 
+ADDR_SIZE = 8
+
 
 # This interface describes a callsite that sends/receive messages in the binary, and therefore should be hooked
-class SendReceiveCallSite:
+class CallSite:
     # This function should set the hook within the symbolic execution engine
     # In our case it gets the angr project with the executable loaded
     # Return value is ignored
@@ -19,15 +21,47 @@ class SendReceiveCallSite:
     def extract_arguments(self, call_context):
         raise NotImplementedError()
 
-    # This function should return the suitable return value to simulate a successful send or receive from the callsite
-    # It is given the buffer, the length and the call_context (which contains the state)
-    # Should return: the return value that will be passed to the caller
-    def get_return_value(self, buffer, length, call_context):
-        raise NotImplementedError()
+    @staticmethod
+    def do_ret_from_plt(engine: maat.MaatEngine):
+        engine.cpu.rip = engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)
+        engine.cpu.rsp = engine.cpu.rsp.as_uint() + ADDR_SIZE
+
+
+class LibcCallSite(CallSite):
+    def __init__(self, offset_plt_ent: int):
+        self.offset_plt_ent = offset_plt_ent
+
+    def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> None:
+        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=self.offset_plt_ent,
+                         callbacks=[self.make_callback()])
+
+    def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
+        engine.cpu.rax = engine.cpu.rdi
+        CallSite.do_ret_from_plt(engine)
+        return maat.ACTION.CONTINUE
+
+    def make_callback(self):
+        return lambda engine: self.execute_callback(engine)
+
+
+class HtonsHook(LibcCallSite):
+    pass
+
+
+class InetPtonHook(LibcCallSite):
+    pass
+
+
+class ConnectHook(LibcCallSite):
+    pass
+
+
+class SocketHook(LibcCallSite):
+    pass
 
 
 class NetHook:
-    def __init__(self, callsite_handler: SendReceiveCallSite):
+    def __init__(self, callsite_handler: CallSite):
         self.callsite_handler = callsite_handler
 
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
@@ -51,13 +85,13 @@ class NetHook:
 class SendHook(NetHook):
     SEND_STRING = 'SEND'
 
-    def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
+    def __init__(self, callsite_handler: CallSite, **kwargs):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
-        action = self.execute_net_callback(engine,pise_attr)
+        action = self.execute_net_callback(engine, pise_attr)
         if action == maat.ACTION.HALT or not engine.solver.check():
             return maat.ACTION.HALT
         return maat.ACTION.CONTINUE
@@ -69,7 +103,7 @@ class SendHook(NetHook):
 class RecvHook(NetHook):
     RECEIVE_STRING = 'RECEIVE'
 
-    def __init__(self, callsite_handler: SendReceiveCallSite, **kwargs):
+    def __init__(self, callsite_handler: CallSite, **kwargs):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):

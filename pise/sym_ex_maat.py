@@ -4,10 +4,11 @@ from pise import sym_ex_helpers_maat
 import logging
 import time
 import maat
+import os
 
 logger = logging.getLogger(__name__)
 
-LIB64_PATH = ""  # TODO: Add path to lib64
+LIB64_PATH = "./lib64/"  # TODO: Add path to lib64
 
 
 class QueryRunner:
@@ -16,6 +17,7 @@ class QueryRunner:
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.pise_attr = None
         self.mode = None
+        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=0x0)
         self.callsites_to_monitor = callsites_to_monitor
 
     def set_membership_hooks(self) -> None:
@@ -37,6 +39,7 @@ class QueryRunner:
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if self.pise_attr.idx == len(self.pise_attr.inputs):
+                    print('Query returned True',20*'*')
                     return True  # Membership is true
                 else:
                     terminated, next_state = self.pise_attr.pop_engine_state()
@@ -45,6 +48,7 @@ class QueryRunner:
                     self.engine = next_state
                     continue
             else:
+                print(20*'-','\n',self.engine.cpu.rip,self.engine.mem.read(self.engine.cpu.rip.as_uint(),10),'\n',20*'-')
                 raise NotImplementedError
 
     def membership_step_by_step(self, inputs: list):
@@ -54,7 +58,7 @@ class QueryRunner:
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-        self.engine.hooks.add(maat.EVENT.BRANCH,maat.WHEN.BEFORE,callbacks=[self.pise_attr.make_branch_callback()])
+        self.engine.hooks.add(maat.EVENT.BRANCH,maat.WHEN.AFTER,callbacks=[self.pise_attr.make_branch_callback()])
         self.set_membership_hooks()
         if False:
             # Cache, as of yet unimplemented
@@ -62,9 +66,7 @@ class QueryRunner:
         else:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
-            # TODO: Add support for args
-            self.engine.load(binary=self.file, type=maat.BIN.ELF64, args=[], libdirs=[LIB64_PATH], load_interp=True)
-            self.engine.inputs = inputs
+            self.pise_attr.inputs = inputs
         if not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         return True, None, 0, 0, 0  # TODO: Add probing
