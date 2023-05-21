@@ -1,57 +1,47 @@
 import logging
 
-from pise import sym_ex_maat, server, hooks, sym_ex_helpers_maat
-import maat, time
+from pise import sym_execution, server, hooks, hooks_angr
+from examples import toy_client_inference_maat
 
-START_ADDRESS = 0x0
-BINARY_PATH = '/Users/evyatarziv/Documents/Technion/Spring 2023/ISC236349/PISE-MAAT/examples/toy_example'
 
-class ToySendHook(hooks.CallSite):
+class ToySendHook(hooks_angr.SendReceiveCallSite):
 
-    def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        send_hook = hooks.SendHook(self)
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, filter=0x1174 + START_ADDRESS,
-                         callbacks=[send_hook.make_callback(pise_attr)])
+    def get_return_value(self, buff, length, call_context):
+        # Something messed up with angr return value handling, so we simply set rax with the desired return value
+        call_context.state.regs.rax = length
+
+    def set_hook(self, p):
+        p.hook_symbol('send', hooks_angr.SendHook(self))
 
     def extract_arguments(self, call_context):
-        length = call_context.cpu.rdx
-        buffer = call_context.cpu.rsi
+        length = call_context.state.regs.edx
+        buffer = call_context.state.regs.rsi
         return buffer, length
 
 
-class ToyRecvHook(hooks.CallSite):
+class ToyRecvHook(hooks_angr.SendReceiveCallSite):
 
-    def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        recv_hook = hooks.RecvHook(self)
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, filter=0x1134 + START_ADDRESS,
-                         callbacks=[recv_hook.make_callback(pise_attr)])
+    def get_return_value(self, buff, length, call_context):
+        # Something messed up with angr return value handling, so we simply set rax with the desired return value
+        call_context.state.regs.rax = length
+
+    def set_hook(self, p):
+        p.hook_symbol('recv', hooks_angr.RecvHook(self))
 
     def extract_arguments(self, call_context):
-        length = call_context.cpu.rdx
-        buffer = call_context.cpu.rsi
+        length = call_context.state.regs.edx
+        buffer = call_context.state.regs.rsi
         return buffer, length
-
-
-SIZE_OF_INT = 4
-
-
-class ToyScanfHook(hooks.LibcCallSite):
-    def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
-        var_addr = engine.cpu.rsi.as_uint()
-        engine.mem.make_concolic(var_addr, 1, SIZE_OF_INT, str(time.time()))
-        hooks.CallSite.do_ret_from_plt(engine)
-        return maat.ACTION.CONTINUE
 
 
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
     # logging.getLogger('angr').setLevel(logging.INFO)
-    query_runner = sym_ex_maat.QueryRunner(BINARY_PATH,
-                                           [ToySendHook(), ToyRecvHook(), hooks.SocketHook(0x1214),
-                                            hooks.ConnectHook(0x1204)])
-    """,
-                                            hooks.HtonsHook(0x1164), hooks.InetPtonHook(0x11d4),
-                                            hooks.ConnectHook(0x1204), ToyScanfHook(0x11e4)])"""
+    query_runner = sym_execution.QueryRunner(toy_client_inference_maat.BINARY_PATH, [ToySendHook(), ToyRecvHook()],
+                                             [toy_client_inference_maat.ToySendHook(),
+                                              toy_client_inference_maat.ToyRecvHook(),
+                                              hooks.SocketHook(0x1214),
+                                              hooks.ConnectHook(0x1204)])
     s = server.Server(query_runner)
     s.listen()
 
