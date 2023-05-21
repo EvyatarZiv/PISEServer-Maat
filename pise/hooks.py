@@ -64,6 +64,10 @@ class NetHook:
     def __init__(self, callsite_handler: CallSite):
         self.callsite_handler = callsite_handler
 
+    @staticmethod
+    def check_monitoring_complete(pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        return len(pise_attr.inputs) == pise_attr.idx
+
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
         buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
@@ -89,7 +93,7 @@ class SendHook(NetHook):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
+        if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         if action == maat.ACTION.HALT or not engine.solver.check():
@@ -107,7 +111,7 @@ class RecvHook(NetHook):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        if engine.inputs[engine.idx].type != RecvHook.RECEIVE_STRING:
+        if NetHook.check_monitoring_complete(pise_attr) or engine.inputs[engine.idx].type != RecvHook.RECEIVE_STRING:
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)
 

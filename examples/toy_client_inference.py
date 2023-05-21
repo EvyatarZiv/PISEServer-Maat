@@ -4,7 +4,7 @@ from pise import sym_ex_maat, server, hooks, sym_ex_helpers_maat
 import maat, time
 
 START_ADDRESS = 0x0
-
+BINARY_PATH = '/Users/evyatarziv/Documents/Technion/Spring 2023/ISC236349/PISE-MAAT/examples/toy_example'
 
 class ToySendHook(hooks.CallSite):
 
@@ -34,6 +34,7 @@ class ToyRecvHook(hooks.CallSite):
 
 SIZE_OF_INT = 4
 
+
 class ToyScanfHook(hooks.LibcCallSite):
     def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
         var_addr = engine.cpu.rsi.as_uint()
@@ -45,10 +46,10 @@ class ToyScanfHook(hooks.LibcCallSite):
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
     # logging.getLogger('angr').setLevel(logging.INFO)
-    query_runner = sym_ex_maat.QueryRunner('/Users/evyatarziv/Documents/Technion/Spring '
-                                           '2023/ISC236349/PISE-MAAT/examples/toy_example',
-                                           [ToySendHook(), ToyRecvHook()])
-    """, hooks.SocketHook(0x1214),
+    query_runner = sym_ex_maat.QueryRunner(BINARY_PATH,
+                                           [ToySendHook(), ToyRecvHook(), hooks.SocketHook(0x1214),
+                                            hooks.ConnectHook(0x1204)])
+    """,
                                             hooks.HtonsHook(0x1164), hooks.InetPtonHook(0x11d4),
                                             hooks.ConnectHook(0x1204), ToyScanfHook(0x11e4)])"""
     s = server.Server(query_runner)
