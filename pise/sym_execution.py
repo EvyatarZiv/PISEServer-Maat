@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class QueryRunner:
-    def __init__(self, file, callsites_to_monitor, maat_callsites):
+    def __init__(self, file, callsites_to_monitor, maat_callsites,addr_main):
         self.file = file
         self.project = angr.Project(file, auto_load_libs=False)
         self.mode = None
@@ -21,7 +21,7 @@ class QueryRunner:
         self.cache = SimulationCache()
         self.probing_cache = ProbingCache()
 
-        self.maat_queryrunner = sym_ex_maat.QueryRunner(file, maat_callsites)
+        self.maat_queryrunner = sym_ex_maat.QueryRunner(file, maat_callsites,addr_main)
 
     def membership_step_by_step(self, inputs):
         logger.info('Performing membership, step by step')

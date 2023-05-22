@@ -24,8 +24,6 @@ class CallSite:
     @staticmethod
     def do_ret_from_plt(engine: maat.MaatEngine):
         engine.cpu.rip = engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)
-        logger.debug(engine.cpu.rip)
-        logger.debug(engine.cpu.rsp)
         engine.cpu.rsp = engine.cpu.rsp.as_uint() + ADDR_SIZE
 
 

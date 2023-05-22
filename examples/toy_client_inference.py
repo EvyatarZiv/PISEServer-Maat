@@ -3,6 +3,9 @@ import logging
 from pise import sym_execution, server, hooks, hooks_angr
 from examples import toy_client_inference_maat
 
+MAIN_OFFSET = 0x1309
+SOCKET_OFFSET = 0x1214
+CONNECT_OFFSET = 0x1204
 
 class ToySendHook(hooks_angr.SendReceiveCallSite):
 
@@ -40,8 +43,8 @@ def main():
     query_runner = sym_execution.QueryRunner(toy_client_inference_maat.BINARY_PATH, [ToySendHook(), ToyRecvHook()],
                                              [toy_client_inference_maat.ToySendHook(),
                                               toy_client_inference_maat.ToyRecvHook(),
-                                              hooks.SocketHook(0x1214), hooks.InetPtonHook(0x11d4),
-                                              hooks.ConnectHook(0x1204)])
+                                              hooks.SocketHook(SOCKET_OFFSET),
+                                              hooks.ConnectHook(CONNECT_OFFSET)],MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
 
