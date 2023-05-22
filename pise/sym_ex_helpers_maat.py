@@ -58,6 +58,7 @@ class PISEAttributes:
             self._solvers[-2].append(cond.invert())
             self._solvers[-1].append(cond)
             self.solver.add(cond)
+            self.solver.check()
             engine.vars.update_from(self.solver.get_model())
         return maat.ACTION.CONTINUE
 
