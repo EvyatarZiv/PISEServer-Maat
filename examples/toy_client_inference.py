@@ -40,7 +40,7 @@ def main():
     query_runner = sym_execution.QueryRunner(toy_client_inference_maat.BINARY_PATH, [ToySendHook(), ToyRecvHook()],
                                              [toy_client_inference_maat.ToySendHook(),
                                               toy_client_inference_maat.ToyRecvHook(),
-                                              hooks.SocketHook(0x1214),
+                                              hooks.SocketHook(0x1214), hooks.InetPtonHook(0x11d4),
                                               hooks.ConnectHook(0x1204)])
     s = server.Server(query_runner)
     s.listen()

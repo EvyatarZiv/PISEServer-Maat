@@ -6,7 +6,7 @@ import maat
 
 logger = logging.getLogger(__name__)
 
-LIB64_PATH = "./lib64/"  # TODO: Add path to lib64
+LIB64_PATH = "./lib64"
 
 
 class QueryRunner:
@@ -28,7 +28,9 @@ class QueryRunner:
 
     def do_monitoring(self) -> bool:
         while True:
-            stop_res = self.engine.run()
+            logger.info('Loop')
+            stop_res = self.engine.run_from(0x1309)
+            logger.info('Stop')
             if stop_res == maat.STOP.EXIT:
                 terminated, next_state = self.pise_attr.pop_engine_state()
                 if not terminated:
@@ -46,7 +48,7 @@ class QueryRunner:
                     self.engine = next_state
                     continue
             else:
-                print(20*'-','\n',self.engine.cpu.rip,self.engine.mem.read(self.engine.cpu.rip.as_uint(),10),'\n',20*'-')
+                print(20*'-','\n',self.engine.info.addr,'\n',20*'-')
                 raise NotImplementedError
 
     def membership_step_by_step(self, inputs: list):
@@ -57,6 +59,7 @@ class QueryRunner:
         logger.debug('Query: %s' % inputs)
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
         self.engine.hooks.add(maat.EVENT.BRANCH,maat.WHEN.AFTER,callbacks=[self.pise_attr.make_branch_callback()])
+
         self.set_membership_hooks()
         if False:
             # Cache, as of yet unimplemented
