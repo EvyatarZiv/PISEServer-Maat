@@ -23,11 +23,8 @@ class CallSite:
 
     @staticmethod
     def do_ret_from_plt(engine: maat.MaatEngine):
-        logger.debug(hex(engine.cpu.rip.as_uint()))
         engine.cpu.rip = engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)
         engine.cpu.rsp = engine.cpu.rsp.as_uint() + ADDR_SIZE
-        logger.debug(hex(engine.cpu.rip.as_uint()))
-        logger.debug(hex(engine.cpu.rbp.as_uint()))
 
 
 class LibcCallSite(CallSite):
@@ -41,7 +38,7 @@ class LibcCallSite(CallSite):
     def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
         logger.debug('Libc hook')
         engine.cpu.rax = engine.cpu.rdi
-        logger.debug(engine.mem)
+        #logger.debug(engine.mem)
         CallSite.do_ret_from_plt(engine)
         logger.debug('Done')
         return maat.ACTION.CONTINUE
