@@ -5,7 +5,7 @@ import logging
 import maat
 
 logger = logging.getLogger(__name__)
-
+BASE_ADDR = 0x04000000
 LIB64_PATH = "./lib64"
 
 
@@ -15,7 +15,8 @@ class QueryRunner:
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.pise_attr = None
         self.mode = None
-        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=0x0)
+        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
+        logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
 
     def set_membership_hooks(self) -> None:
@@ -29,7 +30,7 @@ class QueryRunner:
     def do_monitoring(self) -> bool:
         while True:
             logger.info('Loop')
-            stop_res = self.engine.run_from(0x1309)
+            stop_res = self.engine.run_from(BASE_ADDR+0x130d)
             logger.info('Stop')
             if stop_res == maat.STOP.EXIT:
                 terminated, next_state = self.pise_attr.pop_engine_state()
@@ -48,7 +49,7 @@ class QueryRunner:
                     self.engine = next_state
                     continue
             else:
-                print(20*'-','\n',self.engine.info.addr,'\n',20*'-')
+                logger.debug(self.engine.cpu.rip)
                 raise NotImplementedError
 
     def membership_step_by_step(self, inputs: list):

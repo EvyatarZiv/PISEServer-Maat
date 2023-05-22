@@ -1,6 +1,6 @@
 import logging
 import maat
-from pise import sym_ex_helpers_maat
+from pise import sym_ex_helpers_maat, sym_ex_maat
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class LibcCallSite(CallSite):
         self.offset_plt_ent = offset_plt_ent
 
     def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> None:
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=self.offset_plt_ent,
+        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=sym_ex_maat.BASE_ADDR+self.offset_plt_ent,
                          callbacks=[self.make_callback()])
 
     def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
