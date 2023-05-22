@@ -10,7 +10,7 @@ LIB64_PATH = "./lib64"
 
 
 class QueryRunner:
-    def __init__(self, file, callsites_to_monitor):
+    def __init__(self, file, callsites_to_monitor, addr_main):
         self.file = file
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.pise_attr = None
@@ -18,6 +18,7 @@ class QueryRunner:
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
+        self.addr_main = addr_main
 
     def set_membership_hooks(self) -> None:
         if self.mode == 'membership':
@@ -28,9 +29,17 @@ class QueryRunner:
         self.mode = 'membership'
 
     def do_monitoring(self) -> bool:
+        def main_callback(engine):
+            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.AFTER,
+                                  callbacks=[self.pise_attr.make_branch_callback()])
+            return maat.ACTION.CONTINUE
+
+        self.engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, callbacks=[main_callback], filter=self.addr_main + BASE_ADDR)
         while True:
             logger.info('Loop')
-            stop_res = self.engine.run_from(BASE_ADDR+0x130d)
+
+            stop_res = self.engine.run()
+
             logger.info('Stop')
             if stop_res == maat.STOP.EXIT:
                 terminated, next_state = self.pise_attr.pop_engine_state()
@@ -59,7 +68,6 @@ class QueryRunner:
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-        self.engine.hooks.add(maat.EVENT.BRANCH,maat.WHEN.AFTER,callbacks=[self.pise_attr.make_branch_callback()])
 
         self.set_membership_hooks()
         if False:

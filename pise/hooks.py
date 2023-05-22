@@ -24,6 +24,8 @@ class CallSite:
     @staticmethod
     def do_ret_from_plt(engine: maat.MaatEngine):
         engine.cpu.rip = engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)
+        logger.debug(engine.cpu.rip)
+        logger.debug(engine.cpu.rsp)
         engine.cpu.rsp = engine.cpu.rsp.as_uint() + ADDR_SIZE
 
 
@@ -96,7 +98,6 @@ class SendHook(NetHook):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        logger.debug('Starting send hook')
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
