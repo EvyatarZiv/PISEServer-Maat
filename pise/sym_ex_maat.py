@@ -16,7 +16,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        logger.debug(self.engine.mem)
+        #logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
 

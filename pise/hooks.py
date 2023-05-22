@@ -73,8 +73,9 @@ class NetHook:
 
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
-        buffer_addr = buffer_arg.as_uint(ctx=engine.solver.get_model())
-        length = length_arg.as_uint(ctx=engine.solver.get_model())
+        pise_attr.solver.check()
+        buffer_addr = buffer_arg.as_uint(pise_attr.solver.get_model())
+        length = length_arg.as_uint(pise_attr.solver.get_model())
 
         message_type = pise_attr.inputs[pise_attr.idx]
         engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
@@ -84,8 +85,9 @@ class NetHook:
             if offset >= length:
                 return maat.ACTION.HALT
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
-            engine.solver.add(symb_byte == value)
+            pise_attr.solver.add(symb_byte == value)
         pise_attr.idx += 1
+        LibcCallSite.do_ret_from_plt(engine)
         return maat.ACTION.CONTINUE
 
 
@@ -96,11 +98,12 @@ class SendHook(NetHook):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        logger.debug(engine.cpu.rip)
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         logger.debug('Checking satisfiability')
-        if action == maat.ACTION.HALT or not engine.solver.check():
+        if action == maat.ACTION.HALT or not pise_attr.solver.check():
             return maat.ACTION.HALT
         logger.debug('Checking satisfiability')
         return maat.ACTION.CONTINUE

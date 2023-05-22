@@ -18,7 +18,7 @@ class ToySendHook(hooks.CallSite):
 
     def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         send_hook = hooks.SendHook(self)
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, filter=SEND_OFFSET+sym_ex_maat.BASE_ADDR,
+        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=SEND_OFFSET+sym_ex_maat.BASE_ADDR,
                          callbacks=[send_hook.make_callback(pise_attr)])
 
     def extract_arguments(self, call_context):
@@ -31,7 +31,7 @@ class ToyRecvHook(hooks.CallSite):
 
     def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         recv_hook = hooks.RecvHook(self)
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, filter=RECV_OFFSET+sym_ex_maat.BASE_ADDR,
+        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=RECV_OFFSET+sym_ex_maat.BASE_ADDR,
                          callbacks=[recv_hook.make_callback(pise_attr)])
 
     def extract_arguments(self, call_context):

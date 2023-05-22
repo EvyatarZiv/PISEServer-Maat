@@ -2,14 +2,18 @@ import logging
 import time
 import maat
 from copy import deepcopy
+import os
+import logging
+logger = logging.getLogger(__name__)
 
+TEMP_PATH = "./pise/tmp"
 
 class PISEAttributes:
     def __init__(self, inputs):
         self.inputs = inputs
         self.idx = 0
         self.indices = []
-        self.state_manager = maat.SimpleStateManager("./tmp")
+        self.state_manager = maat.SimpleStateManager(TEMP_PATH)
         self._solvers = [[]]
         self.solver = maat.Solver()
 
@@ -22,6 +26,7 @@ class PISEAttributes:
         return sl
 
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
+        logger.debug(os.getcwd())
         self.state_manager.enqueue_state(engine)
         sl = deepcopy(self._solvers[-1])
         self._solvers.append(sl)

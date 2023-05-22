@@ -28,6 +28,9 @@ class QueryRunner:
         logger.debug('Query: %s' % inputs)
 
         try:
+            self.maat_queryrunner = sym_ex_maat.QueryRunner(self.file,
+                                                            self.maat_queryrunner.callsites_to_monitor,
+                                                            self.maat_queryrunner.addr_main)
             maat_monitoring_res = self.maat_queryrunner.membership_step_by_step(inputs)
         except:
             logger.info(f"MAAT exception")
