@@ -25,16 +25,23 @@ class PISEAttributes:
             sl.add(cnd)
         return sl
 
+    def gen_conditions(self):
+        if not self._solvers:
+            return []
+        sl = []
+        for cnd in self._solvers[-1]:
+            sl.append(cnd)
+        return sl
+
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
         logger.debug(os.getcwd())
         self.state_manager.enqueue_state(engine)
-        sl = deepcopy(self._solvers[-1])
+        sl = self.gen_conditions()
         self._solvers.append(sl)
         self.indices.append(self.idx)
 
     def pop_engine_state(self) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
-        self.solver = maat.Solver()
         self.solver = self.gen_solver()
         engine = maat.MaatEngine(maat.ARCH.X64)
         pop_success = self.state_manager.dequeue_state(engine)
@@ -48,8 +55,10 @@ class PISEAttributes:
             return maat.ACTION.CONTINUE
         cond = None
         if engine.info.branch.taken:
+            # logger.debug("TAKEN")
             cond = engine.info.branch.cond
         else:
+            # logger.debug("NOT TAKEN")
             cond = engine.info.branch.cond.invert()
         sl = self.gen_solver()
         sl.add(cond.invert())
@@ -59,6 +68,7 @@ class PISEAttributes:
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             self.solver.check()
+            # logger.debug(self.solver.check())
             engine.vars.update_from(self.solver.get_model())
         return maat.ACTION.CONTINUE
 
