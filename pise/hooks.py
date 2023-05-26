@@ -71,9 +71,8 @@ class NetHook:
 
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
-        pise_attr.solver.check()
-        buffer_addr = buffer_arg.as_uint(pise_attr.solver.get_model())
-        length = length_arg.as_uint(pise_attr.solver.get_model())
+        buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
+        length = length_arg.as_uint(pise_attr.make_model())
 
         message_type = pise_attr.inputs[pise_attr.idx]
         engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
@@ -119,6 +118,7 @@ class RecvHook(NetHook):
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             return maat.ACTION.HALT
+        engine.vars.update_from(pise_attr.make_model())
         return self.execute_net_callback(engine, pise_attr)
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):

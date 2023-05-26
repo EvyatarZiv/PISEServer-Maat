@@ -37,6 +37,10 @@ class PISEAttributes:
         self._solvers[-1].append(cond)
         self.solver = self.gen_solver()
 
+    def make_model(self) -> maat.VarContext:
+        self.solver.check()
+        return self.solver.get_model()
+
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
         self.state_manager.enqueue_state(engine)
         sl = self.gen_conditions()
@@ -64,6 +68,9 @@ class PISEAttributes:
         else:
             # logger.debug("NOT TAKEN")
             cond = engine.info.branch.cond.invert()
+        sl_debug = self.gen_solver()
+        sl_debug.add(engine.info.branch.cond)
+        logger.debug(sl_debug.check())
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
@@ -73,9 +80,8 @@ class PISEAttributes:
             sl_debug = self.gen_solver()
             logger.debug(sl_debug.check())
             self.solver.add(cond)
-            self.solver.check()
             # logger.debug(self.solver.check())
-            engine.vars.update_from(self.solver.get_model())
+            engine.vars.update_from(self.solver.make_model())
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
