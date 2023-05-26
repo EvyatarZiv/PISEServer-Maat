@@ -81,7 +81,7 @@ class PISEAttributes:
             logger.debug(sl_debug.check())
             self.solver.add(cond)
             # logger.debug(self.solver.check())
-            engine.vars.update_from(self.solver.make_model())
+            engine.vars.update_from(self.make_model())
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
