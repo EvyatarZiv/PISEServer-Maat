@@ -55,6 +55,7 @@ class PISEAttributes:
         if pop_success:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
+            engine.vars.update_from(self.make_model())
             logger.debug(engine.cpu.rip)
         return pop_success, engine
 
