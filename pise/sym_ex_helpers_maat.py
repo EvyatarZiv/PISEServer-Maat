@@ -44,8 +44,8 @@ class PISEAttributes:
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
         self.state_manager.enqueue_state(engine)
         sl = self.gen_conditions()
-        self._solvers.append(sl)
-        self.indices.append(self.idx)
+        self._solvers = [sl] + self._solvers
+        self.indices = [self.idx] + self.indices
 
     def pop_engine_state(self) -> (bool, maat.MaatEngine):
         logger.debug("Popping engine")
@@ -75,7 +75,7 @@ class PISEAttributes:
         sl.add(cond.invert())
         if sl.check():
             self.save_engine_state(engine)
-            self._solvers[-2].append(cond.invert())
+            self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
             sl_debug = self.gen_solver()
             logger.debug(sl_debug.check())
