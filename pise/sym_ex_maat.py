@@ -52,7 +52,7 @@ class QueryRunner:
                     print('Query returned True',20*'*')
                     return True  # Membership is true
                 else:
-                    terminated, next_state = self.pise_attr.pop_engine_state()
+                    terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                     if not terminated:
                         return False  # Membership is false
                     self.engine = next_state
