@@ -38,7 +38,6 @@ class PISEAttributes:
         self.solver = self.gen_solver()
 
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
-        logger.debug(os.getcwd())
         self.state_manager.enqueue_state(engine)
         sl = self.gen_conditions()
         self._solvers.append(sl)
@@ -70,8 +69,6 @@ class PISEAttributes:
             self.save_engine_state(engine)
             self._solvers[-2].append(cond.invert())
             self._solvers[-1].append(cond)
-            sl_debug = self.gen_solver()
-            logger.debug(sl_debug.check())
             self.solver.add(cond)
             self.solver.check()
             # logger.debug(self.solver.check())

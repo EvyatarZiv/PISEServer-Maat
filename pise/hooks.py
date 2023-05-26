@@ -36,11 +36,9 @@ class LibcCallSite(CallSite):
                          callbacks=[self.make_callback()])
 
     def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
-        logger.debug('Libc hook')
         engine.cpu.rax = engine.cpu.rdi
         #logger.debug(engine.mem)
         CallSite.do_ret_from_plt(engine)
-        logger.debug('Done')
         return maat.ACTION.CONTINUE
 
     def make_callback(self):
@@ -99,14 +97,13 @@ class SendHook(NetHook):
         super().__init__(callsite_handler)
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        logger.debug(engine.cpu.rip)
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
-        logger.debug('Checking satisfiability')
+        #logger.debug('Checking satisfiability')
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
             return maat.ACTION.HALT
-        logger.debug('Checking satisfiability')
+        #logger.debug('Checking satisfiability')
         return maat.ACTION.CONTINUE
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):
