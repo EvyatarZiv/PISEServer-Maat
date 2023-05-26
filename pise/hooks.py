@@ -85,7 +85,7 @@ class NetHook:
             if offset >= length:
                 return maat.ACTION.HALT
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
-            pise_attr.solver.add(symb_byte == value)
+            pise_attr.add_constraint(symb_byte == value)
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
         return maat.ACTION.CONTINUE

@@ -33,6 +33,10 @@ class PISEAttributes:
             sl.append(cnd)
         return sl
 
+    def add_constraint(self, cond: maat.Constraint) -> None:
+        self._solvers[-1].append(cond)
+        self.solver = self.gen_solver()
+
     def save_engine_state(self, engine: maat.MaatEngine) -> None:
         logger.debug(os.getcwd())
         self.state_manager.enqueue_state(engine)
