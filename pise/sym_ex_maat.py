@@ -30,7 +30,7 @@ class QueryRunner:
 
     def do_monitoring(self) -> bool:
         def main_callback(engine):
-            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.AFTER,
+            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                                   callbacks=[self.pise_attr.make_branch_callback()])
             return maat.ACTION.CONTINUE
 
