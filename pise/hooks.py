@@ -86,6 +86,7 @@ class NetHook:
             pise_attr.add_constraint(symb_byte == value)
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
+        engine.vars.update_from(pise_attr.make_model())
         return maat.ACTION.CONTINUE
 
 
@@ -118,7 +119,6 @@ class RecvHook(NetHook):
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             return maat.ACTION.HALT
-        engine.vars.update_from(pise_attr.make_model())
         return self.execute_net_callback(engine, pise_attr)
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):
