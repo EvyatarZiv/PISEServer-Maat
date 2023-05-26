@@ -55,6 +55,7 @@ class PISEAttributes:
         if pop_success:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
+            logger.debug(engine.cpu.rip)
         return pop_success, engine
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
@@ -67,19 +68,13 @@ class PISEAttributes:
         else:
             # logger.debug("NOT TAKEN")
             cond = engine.info.branch.cond.invert()
-        sl_debug = self.gen_solver()
-        sl_debug.add(engine.info.branch.cond)
-        logger.debug(sl_debug.check())
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
             self.save_engine_state(engine)
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
-            sl_debug = self.gen_solver()
-            logger.debug(sl_debug.check())
             self.solver.add(cond)
-            # logger.debug(self.solver.check())
             engine.vars.update_from(self.make_model())
         return maat.ACTION.CONTINUE
 

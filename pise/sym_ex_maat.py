@@ -42,14 +42,14 @@ class QueryRunner:
 
             logger.info('Stop')
             if stop_res == maat.STOP.EXIT:
-                terminated, next_state = self.pise_attr.pop_engine_state()
+                terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                 if not terminated:
                     return False  # Membership is false
                 self.engine = next_state
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if self.pise_attr.idx == len(self.pise_attr.inputs):
-                    print('Query returned True',20*'*')
+                    logger.debug("MAAT query is true")
                     return True  # Membership is true
                 else:
                     terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
