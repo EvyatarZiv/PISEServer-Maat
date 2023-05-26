@@ -70,6 +70,8 @@ class PISEAttributes:
             self.save_engine_state(engine)
             self._solvers[-2].append(cond.invert())
             self._solvers[-1].append(cond)
+            sl_debug = self.gen_solver()
+            logger.debug(sl_debug.check())
             self.solver.add(cond)
             self.solver.check()
             # logger.debug(self.solver.check())
