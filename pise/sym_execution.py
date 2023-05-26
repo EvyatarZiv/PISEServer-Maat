@@ -93,8 +93,7 @@ class QueryRunner:
             # TODO: understand if we ever get here at all. Does probing cache always prevents us from getting here?
             assert(not maat_monitoring_res[0])
             return False, None, ms_time, None, None
-        assert(maat_monitoring_res[0])
-        
+
         # Probing phase
         logger.info('Membership is true - probing')
         logger.info('We have %d states for probing' % len(sm.stashes[final_stash]))
@@ -109,6 +108,7 @@ class QueryRunner:
         if len(inputs) > 0 and inputs[len(inputs)-1].type == 'RECEIVE' and ('probing_done' not in sm.stashes.keys() or len(sm.probing_done) == 0):
             logger.info('Query with last symbol recevied is False')
             return False, None, ms_time, None, None
+        assert(maat_monitoring_res[0])
 
         new_symbols = []
 
