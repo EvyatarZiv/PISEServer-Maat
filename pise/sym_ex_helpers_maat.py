@@ -44,6 +44,7 @@ class PISEAttributes:
         self.indices.append(self.idx)
 
     def pop_engine_state(self) -> (bool, maat.MaatEngine):
+        logger.debug("Popping engine")
         self._solvers = self._solvers[:-1]
         self.solver = self.gen_solver()
         engine = maat.MaatEngine(maat.ARCH.X64)
