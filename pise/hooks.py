@@ -75,6 +75,7 @@ class NetHook:
         length = length_arg.as_uint(pise_attr.make_model())
 
         message_type = pise_attr.inputs[pise_attr.idx]
+        engine.mem.map(buffer_addr, buffer_addr+length, maat.PERM.RW)
         engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
         for (offset, value) in message_type.predicate.items():
             offset = int(offset)
