@@ -88,7 +88,7 @@ class NetHook:
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
         engine.vars.update_from(pise_attr.make_model())
-        return maat.ACTION.CONTINUE
+        return maat.ACTION.CONTINUE if not NetHook.check_monitoring_complete(pise_attr) else maat.ACTION.HALT
 
 
 class SendHook(NetHook):
