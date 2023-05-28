@@ -62,8 +62,12 @@ class SocketHook(LibcCallSite):
 
 
 class NetHook:
+    SEND = 0
+    RECV = 1
+
     def __init__(self, callsite_handler: CallSite):
         self.callsite_handler = callsite_handler
+        self.type = None
 
     @staticmethod
     def check_monitoring_complete(pise_attr: sym_ex_helpers_maat.PISEAttributes):
@@ -75,8 +79,9 @@ class NetHook:
         length = length_arg.as_uint(pise_attr.make_model())
 
         message_type = pise_attr.inputs[pise_attr.idx]
-        engine.mem.map(buffer_addr, buffer_addr+length, maat.PERM.RW)
-        engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
+        #engine.mem.map(buffer_addr, buffer_addr+length, maat.PERM.RW)
+        if self.type == NetHook.RECV:
+            engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
         for (offset, value) in message_type.predicate.items():
             offset = int(offset)
             value = int(value)
@@ -85,9 +90,12 @@ class NetHook:
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
 
             pise_attr.add_constraint(symb_byte == value)
+        res = pise_attr.make_model()
+        if res is None:
+            return maat.ACTION.HALT
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
-        engine.vars.update_from(pise_attr.make_model())
+        engine.vars.update_from(res)
         return maat.ACTION.CONTINUE if not NetHook.check_monitoring_complete(pise_attr) else maat.ACTION.HALT
 
 
@@ -96,6 +104,7 @@ class SendHook(NetHook):
 
     def __init__(self, callsite_handler: CallSite, **kwargs):
         super().__init__(callsite_handler)
+        self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
@@ -116,6 +125,7 @@ class RecvHook(NetHook):
 
     def __init__(self, callsite_handler: CallSite, **kwargs):
         super().__init__(callsite_handler)
+        self.type = NetHook.RECV
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
