@@ -4,11 +4,16 @@ import maat
 from copy import deepcopy
 import os
 import logging
+
 logger = logging.getLogger(__name__)
 
 TEMP_PATH = "./pise/tmp"
+INIT_STATE_PATH = "./pise/tmp/init_state"
+
 
 class PISEAttributes:
+    init_manager = maat.SimpleStateManager(INIT_STATE_PATH)
+
     def __init__(self, inputs):
         self.inputs = inputs
         self.idx = 0
@@ -16,6 +21,18 @@ class PISEAttributes:
         self.state_manager = maat.SimpleStateManager(TEMP_PATH)
         self._solvers = [[]]
         self.solver = maat.Solver()
+
+    @staticmethod
+    def gen_init_state(engine):
+        logger.debug('Init state enqueued')
+        PISEAttributes.init_manager.enqueue_state(engine)
+
+    @staticmethod
+    def set_init_state(engine):
+        logger.debug('Init state set')
+        assert PISEAttributes.init_manager.dequeue_state(engine)
+        PISEAttributes.init_manager.enqueue_state(engine)
+        return engine
 
     def gen_solver(self) -> maat.Solver:
         if not self._solvers:

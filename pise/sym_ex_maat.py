@@ -20,6 +20,16 @@ class QueryRunner:
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
 
+        def main_callback(engine):
+            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
+                                  callbacks=[self.pise_attr.make_branch_callback()])
+            return maat.ACTION.HALT
+
+        self.engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, callbacks=[main_callback],
+                              filter=self.addr_main + BASE_ADDR)
+        self.engine.run()
+        sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
+
     def set_membership_hooks(self) -> None:
         if self.mode == 'membership':
             return
@@ -29,12 +39,7 @@ class QueryRunner:
         self.mode = 'membership'
 
     def do_monitoring(self) -> bool:
-        def main_callback(engine):
-            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
-                                  callbacks=[self.pise_attr.make_branch_callback()])
-            return maat.ACTION.CONTINUE
-
-        self.engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, callbacks=[main_callback], filter=self.addr_main + BASE_ADDR)
+        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         while True:
             logger.info('Loop')
 
