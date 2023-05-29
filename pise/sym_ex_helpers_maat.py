@@ -63,7 +63,6 @@ class PISEAttributes:
         self.indices = [self.idx] + self.indices
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
-        logger.debug("Popping engine")
         self._solvers = self._solvers[:-1]
         self.solver = self.gen_solver()
         pop_success = self.state_manager.dequeue_state(engine)
@@ -71,7 +70,6 @@ class PISEAttributes:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
             engine.vars.update_from(self.make_model())
-            logger.debug(engine.cpu.rip)
         return pop_success, engine
 
     def execute_branch_callback(self, engine: maat.MaatEngine):

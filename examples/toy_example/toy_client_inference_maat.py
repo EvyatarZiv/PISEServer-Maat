@@ -3,8 +3,7 @@ import logging
 from pise import sym_ex_maat, server, hooks, sym_ex_helpers_maat
 import maat, time
 
-START_ADDRESS = 0x0
-BINARY_PATH = './examples/toy_example'
+BINARY_PATH = './examples/toy_example/toy_example'
 
 MAIN_OFFSET = 0x1309
 SOCKET_OFFSET = 0x1214
