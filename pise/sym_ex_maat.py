@@ -21,8 +21,6 @@ class QueryRunner:
         self.addr_main = addr_main
 
         def main_callback(engine):
-            self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
-                                  callbacks=[self.pise_attr.make_branch_callback()])
             return maat.ACTION.HALT
 
         self.engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.BEFORE, callbacks=[main_callback],
@@ -40,6 +38,8 @@ class QueryRunner:
 
     def do_monitoring(self) -> bool:
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
+                              callbacks=[self.pise_attr.make_branch_callback()])
         while True:
             logger.info('Loop')
 
