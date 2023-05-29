@@ -86,12 +86,14 @@ class NetHook:
             offset = int(offset)
             value = int(value)
             if offset >= length:
+                logger.debug('Send hook bad length')
                 return maat.ACTION.HALT
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
 
             pise_attr.add_constraint(symb_byte == value)
         res = pise_attr.make_model()
         if res is None:
+            logger.debug('Send hook unsat')
             return maat.ACTION.HALT
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
@@ -107,8 +109,10 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        logger.debug('Send hook')
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
+        logger.debug('Send hook passed first condition')
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
