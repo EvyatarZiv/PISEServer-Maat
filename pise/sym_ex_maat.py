@@ -29,12 +29,9 @@ class QueryRunner:
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
 
     def set_membership_hooks(self) -> None:
-        if self.mode == 'membership':
-            return
         logger.info('Setting hooks')
         for callsite in self.callsites_to_monitor:
             callsite.set_hook(self.engine, self.pise_attr)
-        self.mode = 'membership'
 
     def do_monitoring(self) -> bool:
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
@@ -83,7 +80,7 @@ class QueryRunner:
         else:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
-            self.pise_attr.inputs = inputs
+            #self.pise_attr.inputs = inputs
         if not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         return True, None, 0, 0, 0  # TODO: Add probing
