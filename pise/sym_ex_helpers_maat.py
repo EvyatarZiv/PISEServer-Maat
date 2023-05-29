@@ -24,12 +24,10 @@ class PISEAttributes:
 
     @staticmethod
     def gen_init_state(engine):
-        logger.debug('Init state enqueued')
         PISEAttributes.init_manager.enqueue_state(engine)
 
     @staticmethod
     def set_init_state(engine):
-        logger.debug('Init state set')
         assert PISEAttributes.init_manager.dequeue_state(engine)
         PISEAttributes.init_manager.enqueue_state(engine)
         return engine

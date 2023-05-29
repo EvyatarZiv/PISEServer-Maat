@@ -39,7 +39,6 @@ class QueryRunner:
         logger.debug(self.engine.hooks)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
-        self.engine.settings.log_insts=True
         while True:
             logger.info('Loop')
 
