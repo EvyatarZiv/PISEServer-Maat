@@ -35,7 +35,6 @@ class QueryRunner:
             callsite.set_hook(self.engine, self.pise_attr)
 
     def do_monitoring(self) -> bool:
-        logger.debug(self.engine.hooks)
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         logger.debug(self.engine.hooks)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
@@ -75,7 +74,7 @@ class QueryRunner:
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-
+        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
         if False:
             # Cache, as of yet unimplemented
