@@ -43,6 +43,7 @@ class QueryRunner:
             if stop_res == maat.STOP.EXIT:
                 terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                 if not terminated:
+                    logger.debug('Exited')
                     return False  # Membership is false
                 self.engine = next_state
                 continue
@@ -53,6 +54,7 @@ class QueryRunner:
                 else:
                     terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                     if not terminated:
+                        logger.debug('Halted')
                         return False  # Membership is false
                     self.engine = next_state
                     continue
