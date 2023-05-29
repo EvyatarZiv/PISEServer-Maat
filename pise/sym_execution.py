@@ -27,6 +27,13 @@ class QueryRunner:
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
 
+
+
+        # Check with probing cache if this query poses an impossible continuation
+        if self.probing_cache.has_contradiction(inputs):
+            logger.info('Query Answered by cache, answer is false')
+            return False, None, 0, None, None
+
         try:
             self.maat_queryrunner = sym_ex_maat.QueryRunner(self.file,
                                                             self.maat_queryrunner.callsites_to_monitor,
@@ -37,12 +44,6 @@ class QueryRunner:
             exit(1)
         else:
             logger.info(f"MAAT result: {maat_monitoring_res}")
-
-        # Check with probing cache if this query poses an impossible continuation
-        if self.probing_cache.has_contradiction(inputs):
-            logger.info('Query Answered by cache, answer is false')
-            assert (not maat_monitoring_res[0])
-            return False, None, 0, None, None
 
         self.set_membership_hooks()
 
