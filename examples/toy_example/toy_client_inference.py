@@ -1,7 +1,7 @@
 import logging
 
 from pise import sym_execution, server, hooks, hooks_angr
-from examples import toy_client_inference_maat
+from examples.toy_example import toy_client_inference_maat
 
 MAIN_OFFSET = 0x1309
 SOCKET_OFFSET = 0x1214

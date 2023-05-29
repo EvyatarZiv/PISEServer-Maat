@@ -2,7 +2,7 @@ import logging
 
 from angr import SimProcedure
 from pise import sym_execution, server, hooks_angr, hooks
-import gh0st_rat_inference_maat
+from examples.ghost import gh0st_rat_inference_maat
 
 
 class Gh0stSendHook(hooks_angr.SendReceiveCallSite):
