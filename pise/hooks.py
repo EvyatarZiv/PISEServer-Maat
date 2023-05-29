@@ -110,6 +110,8 @@ class SendHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         logger.debug('Send hook')
+        logger.debug(f'{NetHook.check_monitoring_complete(pise_attr)}')
+        logger.debug(f'{pise_attr.inputs[pise_attr.idx].type}')
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         logger.debug('Send hook passed first condition')
