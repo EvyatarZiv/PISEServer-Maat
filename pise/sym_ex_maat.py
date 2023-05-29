@@ -37,6 +37,7 @@ class QueryRunner:
     def do_monitoring(self) -> bool:
         logger.debug(self.engine.hooks)
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+        logger.debug(self.engine.hooks)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
         self.engine.settings.log_insts=True
