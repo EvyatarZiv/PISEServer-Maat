@@ -40,6 +40,7 @@ class QueryRunner:
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
+        self.engine.settings.log_insts=True
         while True:
             logger.info('Loop')
 
@@ -59,6 +60,7 @@ class QueryRunner:
                 else:
                     terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                     if not terminated:
+                        logger.debug(self.engine.cpu.rip)
                         return False  # Membership is false
                     self.engine = next_state
                     continue
