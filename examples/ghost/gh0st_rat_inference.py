@@ -57,7 +57,8 @@ def main():
                                                                            HasMsgHook()],
                                              [gh0st_rat_inference_maat.Gh0stRecvHook(),
                                               gh0st_rat_inference_maat.Gh0stSendHook(),
-                                              hooks.ConnectHook(gh0st_rat_inference_maat.CONNECT_OFFSET)],
+                                              hooks.ConnectHook(gh0st_rat_inference_maat.CONNECT_OFFSET),
+                                              hooks.SocketHook(gh0st_rat_inference_maat.SOCKET_OFFSET)],
                                              gh0st_rat_inference_maat.MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()

@@ -6,7 +6,7 @@ import maat
 BINARY_PATH = './examples/toy_example/toy_example'
 
 MAIN_OFFSET = 0x2556
-SOCKET_OFFSET = 0x1214
+SOCKET_OFFSET = 0x11b4
 CONNECT_OFFSET = 0x11a4
 SCANF_OFFSET = 0x11e4
 RECV_OFFSET = 0x1104
