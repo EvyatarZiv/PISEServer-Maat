@@ -74,6 +74,7 @@ class QueryRunner:
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
+        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
         if False:
