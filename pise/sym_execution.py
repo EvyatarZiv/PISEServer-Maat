@@ -30,12 +30,14 @@ class QueryRunner:
 
 
         # Check with probing cache if this query poses an impossible continuation
-        if self.probing_cache.has_contradiction(inputs):
+        if self.probing_cache.has_contradiction(inputs) and False:
             logger.info('Query Answered by cache, answer is false')
             return False, None, 0, None, None
 
         try:
+            logger.debug(f'Start MAAT')
             maat_monitoring_res = self.maat_queryrunner.membership_step_by_step(inputs)
+            logger.debug(f'End MAAT')
         except:
             logger.info(f"MAAT exception")
             exit(1)
@@ -46,6 +48,8 @@ class QueryRunner:
 
         # Check cache if we have states available for a prefix of our query
         cached_prefix_len, cached_states = self.cache.lookup(inputs)
+        cached_prefix_len = 0
+        cached_states = None
 
         if cached_states is not None:
             # If we found anything in the cache, just register those states with the monitor plugin
@@ -58,6 +62,7 @@ class QueryRunner:
         else:
             # If we haven't find anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
+            logger.debug('Start ANGR')
             entry_state = self.project.factory.entry_state(add_options=angr.options.unicorn)
             entry_state.options.add(angr.options.ZERO_FILL_UNCONSTRAINED_MEMORY)
             entry_state.options.add(angr.options.ZERO_FILL_UNCONSTRAINED_REGISTERS)
@@ -82,7 +87,7 @@ class QueryRunner:
             else:
                 logger.error('Next stash is not available, we have no states left!')
                 break
-
+        logger.debug('End ANGR')
         final_stash = "position_%d" % len(inputs)
         ms_time = time.process_time_ns() - t
 
