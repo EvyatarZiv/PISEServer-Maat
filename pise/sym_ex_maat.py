@@ -27,6 +27,7 @@ class QueryRunner:
                               filter=self.addr_main + BASE_ADDR)
         self.engine.run()
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
+        logger.debug(self.engine.hooks)
 
     def set_membership_hooks(self) -> None:
         logger.info('Setting hooks')
