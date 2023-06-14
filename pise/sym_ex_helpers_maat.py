@@ -22,6 +22,12 @@ class PISEAttributes:
         self._solvers = [[]]
         self.solver = maat.Solver()
 
+        self.new_syms = []
+        self.reached_next = False
+
+    def begin_probing(self):
+        self.state_manager = maat.SimpleStateManager(TEMP_PATH)
+
     @staticmethod
     def gen_init_state(engine):
         PISEAttributes.init_manager.enqueue_state(engine)

@@ -1,11 +1,36 @@
 import logging
 import maat
-from pise import sym_ex_helpers_maat, sym_ex_maat
+from pise import sym_ex_helpers_maat, sym_ex_maat, entities
 
 logger = logging.getLogger(__name__)
 
 ADDR_SIZE = 8
+NUM_SOL = 10
 
+def extract_name(predicate: dict) -> str:
+    if len(predicate) == 0:
+        return 'ANY'
+    name = ''
+    for i in sorted(predicate, key=int):
+        if chr(predicate[i]).isprintable():
+            name += chr(predicate[i])
+
+    if name == '':
+        return 'UNKNOWN'
+
+    return name
+
+def match_byte(probing_results, i):
+    ref = probing_results[0][i]
+    return all(map(lambda m: m[i] == ref, probing_results))
+
+
+def extract_predicate(results):
+    predicate = dict()
+    for i in range(len(results[0])):
+        if match_byte(results, i):
+            predicate[str(i)] = results[0][i]
+    return predicate
 
 # This interface describes a callsite that sends/receive messages in the binary, and therefore should be hooked
 class CallSite:
@@ -65,9 +90,22 @@ class NetHook:
     SEND = 0
     RECV = 1
 
+    MONITORING = 0
+    PROBING = 1
+
     def __init__(self, callsite_handler: CallSite):
         self.callsite_handler = callsite_handler
         self.type = None
+        self.phase = NetHook.MONITORING
+        self.pending_probe = False
+
+    def gen_probing_results(self, engine: maat.MaatEngine, buffer_addr, length):
+        results = []
+        for i in range(NUM_SOL):
+            results.append(b'')
+            for j in range(length):
+                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes()
+        return results
 
     @staticmethod
     def check_monitoring_complete(pise_attr: sym_ex_helpers_maat.PISEAttributes):
@@ -107,7 +145,18 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        if self.phase == NetHook.PROBING:
+            if not self.pending_probe:
+                buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
+                buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
+                length = length_arg.as_uint(pise_attr.make_model())
+                predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
+                sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
+                pise_attr.new_syms.append(sym)
+            pise_attr.reached_next = True
+            return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
+            self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
@@ -128,7 +177,23 @@ class RecvHook(NetHook):
         self.type = NetHook.RECV
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        if self.phase == NetHook.PROBING:
+            if not self.pending_probe:
+                self.pending_probe = True
+                pise_attr.reached_next = False
+                buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
+                buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
+                length = length_arg.as_uint(pise_attr.make_model())
+                stop = engine.run()
+                if not pise_attr.reached_next:
+                    return maat.ACTION.HALT
+                predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
+                sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
+                pise_attr.new_syms.append(sym)
+            pise_attr.reached_next = True
+            return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
+            self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)
 

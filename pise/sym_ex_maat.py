@@ -16,7 +16,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        #logger.debug(self.engine.mem)
+        # logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
 
@@ -34,10 +34,7 @@ class QueryRunner:
         for callsite in self.callsites_to_monitor:
             callsite.set_hook(self.engine, self.pise_attr)
 
-    def do_monitoring(self) -> bool:
-        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
-        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
-                              callbacks=[self.pise_attr.make_branch_callback()])
+    def do_query_loop(self):
         while True:
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
@@ -60,6 +57,17 @@ class QueryRunner:
                 logger.debug(self.engine.cpu.rip)
                 raise NotImplementedError
 
+    def do_monitoring(self) -> bool:
+        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
+                              callbacks=[self.pise_attr.make_branch_callback()])
+        return self.do_query_loop()
+
+    def do_probing(self) -> list:
+        self.pise_attr.new_syms = []
+        self.pise_attr.begin_probing()
+        return self.pise_attr.new_syms
+
     def membership_step_by_step(self, inputs: list):
         """
         :param inputs: List of MessageTypeSymbol objects
@@ -76,9 +84,7 @@ class QueryRunner:
         else:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
-            #self.pise_attr.inputs = inputs
+            # self.pise_attr.inputs = inputs
         if not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
-        return True, None, 0, 0, 0  # TODO: Add probing
-
-
+        return True, self.do_probing(), 0, 0, 0
