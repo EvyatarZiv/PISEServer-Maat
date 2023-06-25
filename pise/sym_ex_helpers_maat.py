@@ -125,18 +125,12 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
-            print('Invert saved')
+            #print('Invert saved')
             self.save_engine_state(engine)
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             engine.vars.update_from(self.make_model())
-        if self.probing:
-            print(f'Hook @ {engine.cpu.rip}')
-            PISEAttributes.DEBUG_COUNTER += 1
-            if PISEAttributes.DEBUG_COUNTER > 1000:
-                PISEAttributes.DEBUG_COUNTER = 0
-                return maat.ACTION.HALT
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):

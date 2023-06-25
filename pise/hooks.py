@@ -88,6 +88,24 @@ class ConnectHook(LibcCallSite):
 class SocketHook(LibcCallSite):
     pass
 
+class StrcmpHook(LibcCallSite):
+    def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes = None) -> maat.ACTION:
+        # logger.debug(engine.mem)
+        s1_ptr = engine.cpu.rdi
+        s2_ptr = engine.cpu.rsi
+        if engine.mem.read(s1_ptr.as_uint(),1).is_concolic(engine.vars):
+            idx = 0
+            while True:
+                ch = engine.mem.read(s2_ptr.as_uint(), 1).as_uint()
+                pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint()+idx, 1) == ch)
+                if ch == 0x0:
+                    break
+                idx+=1
+        CallSite.do_ret_from_plt(engine)
+        return maat.ACTION.CONTINUE
+
+    def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes = None):
+        return lambda engine: self.execute_callback(engine, pise_attr)
 
 class NetHook:
     SEND = 0
