@@ -73,7 +73,7 @@ class QueryRunner:
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
         self.do_query_loop()
-        return self.pise_attr.new_syms
+        return [sym.__dict__ for sym in self.pise_attr.new_syms]
 
     def membership_step_by_step(self, inputs: list):
         """
