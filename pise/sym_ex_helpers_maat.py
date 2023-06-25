@@ -109,6 +109,9 @@ class PISEAttributes:
                 self.pending_buffer_addr, self.pending_buffer_length, self.pending_probe = None, None, False
         return pop_success, engine
 
+
+    DEBUG_COUNTER = 0
+
     def execute_branch_callback(self, engine: maat.MaatEngine):
         if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond')):
             return maat.ACTION.CONTINUE
@@ -127,8 +130,11 @@ class PISEAttributes:
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             engine.vars.update_from(self.make_model())
-        if self.probing and engine.cpu.rip == 0x400158f:
-            print('Bad branch')
+        if self.probing:
+            print(engine.cpu.rip)
+            PISEAttributes.DEBUG_COUNTER += 1
+            if PISEAttributes.DEBUG_COUNTER > 1000:
+                return maat.ACTION.HALT
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
