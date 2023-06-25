@@ -180,6 +180,7 @@ class RecvHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Recv hook')
+        print(self.phase == NetHook.PROBING)
         if self.phase == NetHook.PROBING:
             if not self.pending_probe:
                 self.pending_probe = True
