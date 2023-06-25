@@ -25,7 +25,7 @@ def match_byte(probing_results, i):
     return all(map(lambda m: m[i] == ref, probing_results))
 
 
-# def extract_predicate(results):
+def extract_predicate(results):
     predicate = dict()
     for i in range(len(results[0])):
         if match_byte(results, i):
@@ -157,6 +157,7 @@ class SendHook(NetHook):
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
+            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
@@ -194,6 +195,7 @@ class RecvHook(NetHook):
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
+            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)
 
