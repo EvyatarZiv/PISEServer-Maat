@@ -167,6 +167,7 @@ class SendHook(NetHook):
                 pise_attr.new_syms.append(sym)
                 print(sym.__dict__)
                 return maat.ACTION.HALT
+            print('Recv next callback @ send')
             self.probe_recv_at_next_callback(engine, pise_attr)
             return maat.ACTION.HALT
         if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
@@ -194,6 +195,7 @@ class RecvHook(NetHook):
         self.type = NetHook.RECV
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        print('Recv hook')
         if pise_attr.probing:
             if not pise_attr.pending_probe:
                 pise_attr.pending_probe = True
@@ -202,6 +204,7 @@ class RecvHook(NetHook):
                 pise_attr.pending_buffer_length = length_arg.as_uint(pise_attr.make_model())
                 LibcCallSite.do_ret_from_plt(engine)
                 return maat.ACTION.CONTINUE
+            print('Recv next callback @ recv')
             self.probe_recv_at_next_callback(engine, pise_attr)
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[

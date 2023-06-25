@@ -27,7 +27,6 @@ class PISEAttributes:
         self.solver = maat.Solver()
 
         self.new_syms = []
-        self.reached_next = False
         self.probing = False
         self.pending_probe = False
 
