@@ -127,6 +127,8 @@ class PISEAttributes:
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             engine.vars.update_from(self.make_model())
+        if self.probing:
+            print(f'Probing branch @ {engine.cpu.rip}')
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
