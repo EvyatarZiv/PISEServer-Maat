@@ -146,6 +146,7 @@ class SendHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Send hook')
+        self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
         if self.phase == NetHook.PROBING:
             if not self.pending_probe:
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
@@ -159,7 +160,6 @@ class SendHook(NetHook):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
             LibcCallSite.do_ret_from_plt(engine)
-            print(self.phase == NetHook.PROBING)
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
@@ -181,7 +181,7 @@ class RecvHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Recv hook')
-        print(self.phase == NetHook.PROBING)
+        self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
         if self.phase == NetHook.PROBING:
             if not self.pending_probe:
                 self.pending_probe = True
