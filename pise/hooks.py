@@ -195,6 +195,7 @@ class RecvHook(NetHook):
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
             pise_attr.reached_next = True
+            print('Recv hook done')
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
