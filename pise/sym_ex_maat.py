@@ -94,7 +94,7 @@ class QueryRunner:
             logger.info('No prefix exists in cache, starting from the beginning')
             # self.pise_attr.inputs = inputs
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
-        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
+        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.AFTER,
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
