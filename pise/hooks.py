@@ -151,9 +151,8 @@ class SendHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Send hook')
-        self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
-        if self.phase == NetHook.PROBING:
-            if not self.pending_probe:
+        if pise_attr.phase == NetHook.PROBING:
+            if not pise_attr.pending_probe:
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 length = length_arg.as_uint(pise_attr.make_model())
@@ -163,7 +162,7 @@ class SendHook(NetHook):
             pise_attr.reached_next = True
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
-            self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
+            pise_attr.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else pise_attr.phase
             #LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
@@ -186,10 +185,9 @@ class RecvHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Recv hook')
-        self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
-        if self.phase == NetHook.PROBING:
-            if not self.pending_probe:
-                self.pending_probe = True
+        if pise_attr.probing:
+            if not pise_attr.pending_probe:
+                pise_attr.pending_probe = True
                 pise_attr.reached_next = False
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
@@ -206,7 +204,7 @@ class RecvHook(NetHook):
             print('Recv hook done')
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
-            self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
+            pise_attr.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else pise_attr.phase
             LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)

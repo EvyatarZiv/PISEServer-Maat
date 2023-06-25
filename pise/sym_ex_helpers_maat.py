@@ -29,6 +29,7 @@ class PISEAttributes:
         self.new_syms = []
         self.reached_next = False
         self.probing = False
+        self.pending_probe = False
 
     def begin_probing(self):
         self.state_manager = self.probing_stash
