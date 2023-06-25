@@ -125,6 +125,7 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
+            print('Invert saved')
             self.save_engine_state(engine)
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
