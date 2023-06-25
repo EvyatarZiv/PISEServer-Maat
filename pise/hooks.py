@@ -104,7 +104,7 @@ class NetHook:
         for i in range(NUM_SOL):
             results.append(b'')
             for j in range(length):
-                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes()
+                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes(length=1)
         return results
 
     @staticmethod
@@ -159,7 +159,7 @@ class SendHook(NetHook):
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             self.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else self.phase
-            LibcCallSite.do_ret_from_plt(engine)
+            #LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
