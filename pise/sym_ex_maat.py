@@ -38,6 +38,7 @@ class QueryRunner:
         res = False
         while True:
             stop_res = self.engine.run()
+            print('State dequeue')
             if stop_res == maat.STOP.EXIT:
                 has_next_state, next_state = self.pise_attr.pop_engine_state(self.engine)
                 if not has_next_state:
