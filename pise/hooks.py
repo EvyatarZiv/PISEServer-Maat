@@ -119,8 +119,9 @@ class NetHook:
         print('Adding RECV symbol')
         predicate = extract_predicate(
             self.gen_probing_results(engine, pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length))
-        sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
+        sym = entities.MessageTypeSymbol(RecvHook.RECEIVE_STRING, extract_name(predicate), predicate)
         pise_attr.new_syms.append(sym)
+        print(sym.__dict__)
 
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
