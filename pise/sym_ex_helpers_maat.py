@@ -131,7 +131,7 @@ class PISEAttributes:
             self.solver.add(cond)
             engine.vars.update_from(self.make_model())
         if self.probing:
-            print(engine.cpu.rip)
+            print(f'Hook @ {engine.cpu.rip}')
             PISEAttributes.DEBUG_COUNTER += 1
             if PISEAttributes.DEBUG_COUNTER > 1000:
                 return maat.ACTION.HALT
