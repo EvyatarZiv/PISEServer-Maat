@@ -116,6 +116,7 @@ class NetHook:
         return len(pise_attr.inputs) == pise_attr.idx
 
     def probe_recv_at_next_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        print('Adding RECV symbol')
         predicate = extract_predicate(
             self.gen_probing_results(engine, pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length))
         sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
@@ -157,6 +158,7 @@ class SendHook(NetHook):
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         if pise_attr.probing:
             if not pise_attr.pending_probe:
+                print('Adding SEND symbol')
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 length = length_arg.as_uint(pise_attr.make_model())
