@@ -67,8 +67,7 @@ class QueryRunner:
     def do_probing(self) -> list:
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
-        logger.debug('Hooks:'*1000)
-        logger.debug(self.engine.hooks)
+        print(self.engine.hooks)
         return []
         self.do_query_loop()
         return self.pise_attr.new_syms
