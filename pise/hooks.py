@@ -194,7 +194,6 @@ class RecvHook(NetHook):
         if pise_attr.probing:
             if not pise_attr.pending_probe:
                 pise_attr.pending_probe = True
-                pise_attr.reached_next = False
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 pise_attr.pending_buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 pise_attr.pending_buffer_length = length_arg.as_uint(pise_attr.make_model())
