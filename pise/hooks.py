@@ -163,6 +163,7 @@ class SendHook(NetHook):
                 predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
+                return maat.ACTION.HALT
             self.probe_recv_at_next_callback(engine, pise_attr)
             return maat.ACTION.HALT
         if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
