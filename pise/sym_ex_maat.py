@@ -68,11 +68,11 @@ class QueryRunner:
         return self.do_query_loop()
 
     def do_probing(self) -> list:
-        print('Starting probing')
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
         if not self.advance_state():
             return []
+        print('Starting probing')
         self.do_query_loop()
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
 
@@ -98,4 +98,6 @@ class QueryRunner:
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
+        if len(inputs) == 0:
+            self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
         return True, self.do_probing(), 0, 0, 0
