@@ -39,8 +39,9 @@ class QueryRunner:
         while True:
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
-                print('Popped state')
+                print('Popping state')
                 terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
+                print('Popped state')
                 if not terminated:
                     return res  # Membership is false
                 self.engine = next_state
@@ -50,8 +51,9 @@ class QueryRunner:
                     print("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
-                print('Popped state')
+                print('Popping state')
                 terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
+                print('Popped state')
                 if not terminated:
                     return res  # Membership is false
                 self.engine = next_state
