@@ -104,7 +104,12 @@ class NetHook:
         for i in range(NUM_SOL):
             results.append(b'')
             for j in range(length):
-                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes(length=1, byteorder='big')
+                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint(engine.vars).to_bytes(length=1, byteorder='big')
+                '''val = engine.mem.read(buffer_addr+j, 1)
+                if val.is_concrete() or val.is_concolic():
+                    results[-1] += val.as_uint().to_bytes(length=1, byteorder='big')
+                else:
+                    results[-1] += val.as_uint(engine.vars).to_bytes(length=1, byteorder='big')'''
         return results
 
     @staticmethod
