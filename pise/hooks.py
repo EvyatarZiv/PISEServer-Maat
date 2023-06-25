@@ -177,7 +177,7 @@ class SendHook(NetHook):
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr):
-            pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
+            #pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
             # LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         # logger.debug('Checking satisfiability')
@@ -210,8 +210,8 @@ class RecvHook(NetHook):
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[
             pise_attr.idx].type != RecvHook.RECEIVE_STRING:
-            pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
-            LibcCallSite.do_ret_from_plt(engine)
+            #pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
+            #LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)
 
