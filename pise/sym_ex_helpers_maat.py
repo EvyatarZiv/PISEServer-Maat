@@ -111,6 +111,8 @@ class PISEAttributes:
         return pop_success, engine
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
+        if self.probing:
+            print('Probing branch')
         if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond')):
             return maat.ACTION.CONTINUE
         cond = None
