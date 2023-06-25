@@ -91,7 +91,7 @@ class PISEAttributes:
             self._solvers = [sl] + self._solvers
             self.indices = [self.idx] + self.indices
 
-        if self.probing:
+        if self.probing or stash_for_probing:
             self._pending_queue = [(self.pending_buffer_addr, self.pending_buffer_length)] + self._pending_queue
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
