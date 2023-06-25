@@ -34,6 +34,13 @@ class QueryRunner:
         for callsite in self.callsites_to_monitor:
             callsite.set_hook(self.engine, self.pise_attr)
 
+    def advance_state(self) -> bool:
+        has_next_state, next_state = self.pise_attr.pop_engine_state(self.engine)
+        if not has_next_state:
+            return False
+        self.engine = next_state
+        return True
+
     def do_query_loop(self):
         res = False
         while True:
@@ -42,20 +49,16 @@ class QueryRunner:
             stop_res = self.engine.run()
             print('State dequeue')
             if stop_res == maat.STOP.EXIT:
-                has_next_state, next_state = self.pise_attr.pop_engine_state(self.engine)
-                if not has_next_state:
+                if not self.advance_state():
                     return res
-                self.engine = next_state
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     print("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
-                has_next_state, next_state = self.pise_attr.pop_engine_state(self.engine)
-                if not has_next_state:
-                    return res  # Membership is false
-                self.engine = next_state
+                if not self.advance_state():
+                    return res
                 continue
             else:
                 logger.debug(self.engine.cpu.rip)
@@ -68,6 +71,8 @@ class QueryRunner:
         print('Starting probing')
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
+        if not self.advance_state():
+            return []
         self.do_query_loop()
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
 
