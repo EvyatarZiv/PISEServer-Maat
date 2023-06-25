@@ -33,7 +33,7 @@ class PISEAttributes:
 
         self.pending_buffer_addr = None
         self.pending_buffer_length = None
-        self._pending_queue = []
+        self._pending_queue = [(None, None)]
 
     def begin_probing(self):
         self.state_manager = self.probing_stash
