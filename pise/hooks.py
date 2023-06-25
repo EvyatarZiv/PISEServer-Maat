@@ -145,6 +145,7 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        print('Send hook')
         if self.phase == NetHook.PROBING:
             if not self.pending_probe:
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
@@ -178,6 +179,7 @@ class RecvHook(NetHook):
         self.type = NetHook.RECV
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        print('Recv hook')
         if self.phase == NetHook.PROBING:
             if not self.pending_probe:
                 self.pending_probe = True
