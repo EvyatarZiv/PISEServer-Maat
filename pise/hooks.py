@@ -25,7 +25,7 @@ def match_byte(probing_results, i):
     return all(map(lambda m: m[i] == ref, probing_results))
 
 
-def extract_predicate(results):
+# def extract_predicate(results):
     predicate = dict()
     for i in range(len(results[0])):
         if match_byte(results, i):

@@ -57,7 +57,8 @@ def main():
                                            [ToySendHook(),
                                             ToyRecvHook(),
                                             hooks.SocketHook(SOCKET_OFFSET),
-                                            hooks.ConnectHook(CONNECT_OFFSET)], MAIN_OFFSET)
+                                            hooks.ConnectHook(CONNECT_OFFSET),
+                                            ToyScanfHook(SCANF_OFFSET)], MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
 

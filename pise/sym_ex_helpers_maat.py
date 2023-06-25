@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 TEMP_PATH = "./pise/tmp"
 INIT_STATE_PATH = "./pise/tmp/init_state"
+PROBING_PATH = "./pise/tmp/probing"
 
 
 class PISEAttributes:
@@ -18,15 +19,20 @@ class PISEAttributes:
         self.inputs = inputs
         self.idx = 0
         self.indices = []
+        self.probing_indices = []
         self.state_manager = maat.SimpleStateManager(TEMP_PATH)
+        self.probing_stash = maat.SimpleStateManager(PROBING_PATH)
         self._solvers = [[]]
+        self._probing_solvers = [[]]
         self.solver = maat.Solver()
 
         self.new_syms = []
         self.reached_next = False
 
     def begin_probing(self):
-        self.state_manager = maat.SimpleStateManager(TEMP_PATH)
+        self.state_manager = self.probing_stash
+        self.indices = self.probing_indices
+        self._solvers = self._probing_solvers
 
     @staticmethod
     def gen_init_state(engine):
@@ -46,11 +52,14 @@ class PISEAttributes:
             sl.add(cnd)
         return sl
 
-    def gen_conditions(self):
-        if not self._solvers:
+    def gen_conditions(self, for_probing=False):
+        if not self._solvers and not for_probing:
+            return []
+        if not self._probing_solvers and for_probing:
             return []
         sl = []
-        for cnd in self._solvers[-1]:
+        cnds = self._probing_solvers[-1] if for_probing else self._solvers[-1]
+        for cnd in cnds:
             sl.append(cnd)
         return sl
 
@@ -62,11 +71,18 @@ class PISEAttributes:
         self.solver.check()
         return self.solver.get_model()
 
-    def save_engine_state(self, engine: maat.MaatEngine) -> None:
-        self.state_manager.enqueue_state(engine)
-        sl = self.gen_conditions()
-        self._solvers = [sl] + self._solvers
-        self.indices = [self.idx] + self.indices
+    def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False) -> None:
+        manager: maat.SimpleStateManager = self.state_manager if not stash_for_probing else self.probing_stash
+        solvers = self._solvers if not stash_for_probing else self._probing_solvers
+        manager.enqueue_state(engine)
+        sl = self.gen_conditions(stash_for_probing)
+
+        if stash_for_probing:
+            self._probing_solvers = [sl] + self._probing_solvers
+            self.probing_indices = [self.idx] + self.probing_indices
+        else:
+            self._solvers = [sl] + self._solvers
+            self.indices = [self.idx] + self.indices
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]

@@ -35,24 +35,25 @@ class QueryRunner:
             callsite.set_hook(self.engine, self.pise_attr)
 
     def do_query_loop(self):
+        res = False
         while True:
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
                 terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
                 if not terminated:
-                    return False  # Membership is false
+                    return res  # Membership is false
                 self.engine = next_state
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if self.pise_attr.idx == len(self.pise_attr.inputs):
                     logger.debug("MAAT query is true")
-                    return True  # Membership is true
-                else:
-                    terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
-                    if not terminated:
-                        return False  # Membership is false
-                    self.engine = next_state
-                    continue
+                    self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
+                    res = True
+                terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
+                if not terminated:
+                    return res  # Membership is false
+                self.engine = next_state
+                continue
             else:
                 logger.debug(self.engine.cpu.rip)
                 raise NotImplementedError
@@ -66,6 +67,7 @@ class QueryRunner:
     def do_probing(self) -> list:
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
+        self.do_query_loop()
         return self.pise_attr.new_syms
 
     def membership_step_by_step(self, inputs: list):
