@@ -90,14 +90,9 @@ class NetHook:
     SEND = 0
     RECV = 1
 
-    MONITORING = 0
-    PROBING = 1
-
     def __init__(self, callsite_handler: CallSite):
         self.callsite_handler = callsite_handler
         self.type = None
-        self.phase = NetHook.MONITORING
-        self.pending_probe = False
 
     def gen_probing_results(self, engine: maat.MaatEngine, buffer_addr, length):
         results = []
@@ -161,13 +156,15 @@ class SendHook(NetHook):
                 pise_attr.new_syms.append(sym)
             pise_attr.reached_next = True
             return maat.ACTION.HALT
-        if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
-            pise_attr.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else pise_attr.phase
-            #LibcCallSite.do_ret_from_plt(engine)
+        if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         #logger.debug('Checking satisfiability')
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
+            return maat.ACTION.HALT
+        if NetHook.check_monitoring_complete(pise_attr):
+            pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
+            #LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         #logger.debug('Checking satisfiability')
         return maat.ACTION.CONTINUE
@@ -204,7 +201,7 @@ class RecvHook(NetHook):
             print('Recv hook done')
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
-            pise_attr.phase = NetHook.PROBING if NetHook.check_monitoring_complete(pise_attr) else pise_attr.phase
+            pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
             LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)

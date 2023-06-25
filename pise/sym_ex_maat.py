@@ -92,6 +92,6 @@ class QueryRunner:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
             # self.pise_attr.inputs = inputs
-        if not self.do_monitoring():
+        if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         return True, self.do_probing(), 0, 0, 0
