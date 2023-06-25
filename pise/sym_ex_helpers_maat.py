@@ -135,6 +135,7 @@ class PISEAttributes:
             print(f'Hook @ {engine.cpu.rip}')
             PISEAttributes.DEBUG_COUNTER += 1
             if PISEAttributes.DEBUG_COUNTER > 1000:
+                PISEAttributes.DEBUG_COUNTER = 0
                 return maat.ACTION.HALT
         return maat.ACTION.CONTINUE
 
