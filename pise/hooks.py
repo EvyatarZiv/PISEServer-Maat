@@ -104,7 +104,7 @@ class NetHook:
         for i in range(NUM_SOL):
             results.append(b'')
             for j in range(length):
-                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes(length=1)
+                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint().to_bytes(length=1, byteorder='big')
         return results
 
     @staticmethod
