@@ -46,7 +46,7 @@ class QueryRunner:
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if self.pise_attr.idx == len(self.pise_attr.inputs):
-                    logger.debug("MAAT query is true")
+                    print("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
                 terminated, next_state = self.pise_attr.pop_engine_state(self.engine)
@@ -68,7 +68,6 @@ class QueryRunner:
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
         print(self.engine.hooks)
-        return []
         self.do_query_loop()
         return self.pise_attr.new_syms
 
