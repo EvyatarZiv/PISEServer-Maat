@@ -37,6 +37,8 @@ class QueryRunner:
     def do_query_loop(self):
         res = False
         while True:
+            if self.pise_attr.probing:
+                print(self.engine.rip)
             stop_res = self.engine.run()
             print('State dequeue')
             if stop_res == maat.STOP.EXIT:
