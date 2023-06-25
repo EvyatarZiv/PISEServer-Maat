@@ -190,6 +190,7 @@ class RecvHook(NetHook):
                 LibcCallSite.do_ret_from_plt(engine)
                 stop = engine.run()
                 if not pise_attr.reached_next:
+                    print('Recv probe aborted')
                     return maat.ACTION.HALT
                 predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
