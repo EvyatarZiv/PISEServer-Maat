@@ -130,7 +130,6 @@ class NetHook:
             pise_attr.add_constraint(symb_byte == value)
         res = pise_attr.make_model()
         if res is None:
-            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
@@ -186,6 +185,7 @@ class RecvHook(NetHook):
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 length = length_arg.as_uint(pise_attr.make_model())
+                LibcCallSite.do_ret_from_plt(engine)
                 stop = engine.run()
                 if not pise_attr.reached_next:
                     return maat.ACTION.HALT
