@@ -28,11 +28,13 @@ class PISEAttributes:
 
         self.new_syms = []
         self.reached_next = False
+        self.probing = False
 
     def begin_probing(self):
         self.state_manager = self.probing_stash
         self.indices = self.probing_indices
         self._solvers = self._probing_solvers
+        self.probing = True
 
     @staticmethod
     def gen_init_state(engine):
