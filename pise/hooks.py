@@ -130,6 +130,7 @@ class NetHook:
             pise_attr.add_constraint(symb_byte == value)
         res = pise_attr.make_model()
         if res is None:
+            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
