@@ -151,7 +151,7 @@ class SendHook(NetHook):
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Send hook')
-        if pise_attr.phase == NetHook.PROBING:
+        if pise_attr.probing:
             if not pise_attr.pending_probe:
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
