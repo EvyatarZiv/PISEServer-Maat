@@ -63,9 +63,6 @@ class QueryRunner:
                 raise NotImplementedError
 
     def do_monitoring(self) -> bool:
-        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
-        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
-                              callbacks=[self.pise_attr.make_branch_callback()])
         return self.do_query_loop()
 
     def do_probing(self) -> list:
@@ -92,6 +89,9 @@ class QueryRunner:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
             # self.pise_attr.inputs = inputs
+        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
+                              callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         return True, self.do_probing(), 0, 0, 0

@@ -33,7 +33,7 @@ class PISEAttributes:
 
         self.pending_buffer_addr = None
         self.pending_buffer_length = None
-        self._pending_queue = [(None, None)]
+        self._pending_queue = []
 
     def begin_probing(self):
         self.state_manager = self.probing_stash
@@ -103,8 +103,11 @@ class PISEAttributes:
             self.indices = self.indices[:-1]
             engine.vars.update_from(self.make_model())
         if self.probing:
-            self.pending_buffer_addr, self.pending_buffer_length = self._pending_queue[-1]
-            self._pending_queue = self._pending_queue[:-1]
+            if self._pending_queue:
+                self.pending_buffer_addr, self.pending_buffer_length = self._pending_queue[-1]
+                self._pending_queue = self._pending_queue[:-1]
+            else:
+                self.pending_buffer_addr, self.pending_buffer_length = None, None
         return pop_success, engine
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
