@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 ADDR_SIZE = 8
 NUM_SOL = 10
 
+
 def extract_name(predicate: dict) -> str:
     if len(predicate) == 0:
         return 'ANY'
@@ -20,6 +21,7 @@ def extract_name(predicate: dict) -> str:
 
     return name
 
+
 def match_byte(probing_results, i):
     ref = probing_results[0][i]
     return all(map(lambda m: m[i] == ref, probing_results))
@@ -31,6 +33,7 @@ def extract_predicate(results):
         if match_byte(results, i):
             predicate[str(i)] = results[0][i]
     return predicate
+
 
 # This interface describes a callsite that sends/receive messages in the binary, and therefore should be hooked
 class CallSite:
@@ -57,12 +60,12 @@ class LibcCallSite(CallSite):
         self.offset_plt_ent = offset_plt_ent
 
     def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> None:
-        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=sym_ex_maat.BASE_ADDR+self.offset_plt_ent,
+        engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=sym_ex_maat.BASE_ADDR + self.offset_plt_ent,
                          callbacks=[self.make_callback()])
 
     def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
         engine.cpu.rax = engine.cpu.rdi
-        #logger.debug(engine.mem)
+        # logger.debug(engine.mem)
         CallSite.do_ret_from_plt(engine)
         return maat.ACTION.CONTINUE
 
@@ -99,7 +102,8 @@ class NetHook:
         for i in range(NUM_SOL):
             results.append(b'')
             for j in range(length):
-                results[-1] += engine.mem.read(buffer_addr+j, 1).as_uint(engine.vars).to_bytes(length=1, byteorder='big')
+                results[-1] += engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars).to_bytes(length=1,
+                                                                                                 byteorder='big')
                 '''val = engine.mem.read(buffer_addr+j, 1)
                 if val.is_concrete() or val.is_concolic():
                     results[-1] += val.as_uint().to_bytes(length=1, byteorder='big')
@@ -111,13 +115,19 @@ class NetHook:
     def check_monitoring_complete(pise_attr: sym_ex_helpers_maat.PISEAttributes):
         return len(pise_attr.inputs) == pise_attr.idx
 
+    def probe_recv_at_next_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        predicate = extract_predicate(
+            self.gen_probing_results(engine, pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length))
+        sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
+        pise_attr.new_syms.append(sym)
+
     def execute_net_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
         buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
         length = length_arg.as_uint(pise_attr.make_model())
 
         message_type = pise_attr.inputs[pise_attr.idx]
-        #engine.mem.map(buffer_addr, buffer_addr+length, maat.PERM.RW)
+        # engine.mem.map(buffer_addr, buffer_addr+length, maat.PERM.RW)
         if self.type == NetHook.RECV:
             engine.mem.make_concolic(buffer_addr, length, 1, "msg_%d" % pise_attr.idx)
         for (offset, value) in message_type.predicate.items():
@@ -145,7 +155,6 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        print('Send hook')
         if pise_attr.probing:
             if not pise_attr.pending_probe:
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
@@ -154,19 +163,19 @@ class SendHook(NetHook):
                 predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
-            pise_attr.reached_next = True
+            self.probe_recv_at_next_callback(engine, pise_attr)
             return maat.ACTION.HALT
         if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
-        #logger.debug('Checking satisfiability')
+        # logger.debug('Checking satisfiability')
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr):
             pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
-            #LibcCallSite.do_ret_from_plt(engine)
+            # LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
-        #logger.debug('Checking satisfiability')
+        # logger.debug('Checking satisfiability')
         return maat.ACTION.CONTINUE
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes):
@@ -181,26 +190,19 @@ class RecvHook(NetHook):
         self.type = NetHook.RECV
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        print('Recv hook')
         if pise_attr.probing:
             if not pise_attr.pending_probe:
                 pise_attr.pending_probe = True
                 pise_attr.reached_next = False
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
-                buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
-                length = length_arg.as_uint(pise_attr.make_model())
+                pise_attr.pending_buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
+                pise_attr.pending_buffer_length = length_arg.as_uint(pise_attr.make_model())
                 LibcCallSite.do_ret_from_plt(engine)
-                stop = engine.run()
-                if not pise_attr.reached_next:
-                    print('Recv probe aborted')
-                    return maat.ACTION.HALT
-                predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
-                sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
-                pise_attr.new_syms.append(sym)
-            pise_attr.reached_next = True
-            print('Recv hook done')
+                return maat.ACTION.CONTINUE
+            self.probe_recv_at_next_callback(engine, pise_attr)
             return maat.ACTION.HALT
-        if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[pise_attr.idx].type != RecvHook.RECEIVE_STRING:
+        if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[
+            pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
             LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT

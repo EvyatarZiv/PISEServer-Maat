@@ -31,6 +31,10 @@ class PISEAttributes:
         self.probing = False
         self.pending_probe = False
 
+        self.pending_buffer_addr = None
+        self.pending_buffer_length = None
+        self._pending_queue = []
+
     def begin_probing(self):
         self.state_manager = self.probing_stash
         self.indices = self.probing_indices
@@ -87,6 +91,9 @@ class PISEAttributes:
             self._solvers = [sl] + self._solvers
             self.indices = [self.idx] + self.indices
 
+        if self.probing:
+            self._pending_queue = [(self.pending_buffer_addr, self.pending_buffer_length)] + self._pending_queue
+
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
         self.solver = self.gen_solver()
@@ -95,6 +102,9 @@ class PISEAttributes:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
             engine.vars.update_from(self.make_model())
+        if self.probing:
+            self.pending_buffer_addr, self.pending_buffer_length = self._pending_queue[-1]
+            self._pending_queue = self._pending_queue[:-1]
         return pop_success, engine
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
