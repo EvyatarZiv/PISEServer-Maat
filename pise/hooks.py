@@ -108,7 +108,8 @@ class StrcmpHook(LibcCallSite):
                 idx += 1
             if not pise_attr.gen_solver().check():
                 print("UNSAT STRCMP")
-                print(pise_attr.gen_conditions(True))
+                print(pise_attr.gen_conditions())
+                print(engine.vars)
                 pise_attr.pop_engine_state(engine)
         return maat.ACTION.CONTINUE
 
