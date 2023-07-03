@@ -101,9 +101,9 @@ class StrcmpHook(LibcCallSite):
             while True:
                 ch = engine.mem.read(s2_ptr.as_uint(engine.vars)+idx, 1)
                 cond = engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1) == ch
-                print(cond,ch,engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1))
+                print(cond, ch, engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1))
                 pise_attr.add_constraint(cond)
-                if ch.as_uint(engine.vars) == 0x0:
+                if ch.as_uint(engine.vars) == 0x0 or not pise_attr.gen_solver().check():
                     break
                 idx += 1
             if not pise_attr.gen_solver().check():
