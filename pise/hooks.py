@@ -126,7 +126,7 @@ class NetHook:
             solver = pise_attr.gen_solver()
             solver.add(engine.mem.read(buffer_addr + j, 1) != next_byte)
             if not solver.check():
-                results[str(j)] = next_byte.to_bytes(length=1, byteorder='big')
+                results[str(j)] = next_byte #.to_bytes(length=1, byteorder='big')
         return results
 
     @staticmethod
