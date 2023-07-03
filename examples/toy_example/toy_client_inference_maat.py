@@ -44,7 +44,7 @@ SIZE_OF_INT = 4
 
 
 class ToyScanfHook(hooks.LibcCallSite):
-    def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
+    def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes = None) -> maat.ACTION:
         var_addr = engine.cpu.rsi.as_uint()
         engine.mem.make_concolic(var_addr, 1, SIZE_OF_INT, str(time.time()))
         hooks.CallSite.do_ret_from_plt(engine)
