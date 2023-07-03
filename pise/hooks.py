@@ -103,6 +103,7 @@ class StrcmpHook(LibcCallSite):
                 pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1) == ch)
                 if ch.as_uint(engine.vars) == 0x0:
                     break
+                print(idx)
                 idx += 1
             if not pise_attr.gen_solver().check():
                 pise_attr.pop_engine_state(engine)
