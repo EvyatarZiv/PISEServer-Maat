@@ -99,9 +99,9 @@ class StrcmpHook(LibcCallSite):
             pise_attr.add_constraint(engine.cpu.rax == 0)
             idx = 0
             while True:
-                ch = engine.mem.read(s2_ptr.as_uint(), 1)
-                pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint()+idx, 1) == ch)
-                if ch.as_uint() == 0x0:
+                ch = engine.mem.read(s2_ptr.as_uint(engine.vars), 1)
+                pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1) == ch)
+                if ch.as_uint(engine.vars) == 0x0:
                     break
                 idx += 1
             if not pise_attr.gen_solver().check():
