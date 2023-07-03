@@ -100,7 +100,9 @@ class StrcmpHook(LibcCallSite):
             idx = 0
             while True:
                 ch = engine.mem.read(s2_ptr.as_uint(engine.vars)+idx, 1)
-                pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1) == ch)
+                cond = engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1) == ch
+                print(cond,ch,engine.mem.read(s1_ptr.as_uint(engine.vars)+idx, 1))
+                pise_attr.add_constraint(cond)
                 if ch.as_uint(engine.vars) == 0x0:
                     break
                 idx += 1
@@ -126,7 +128,6 @@ class NetHook:
             next_byte = engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars)
             solver = pise_attr.gen_solver()
             solver.add(engine.mem.read(buffer_addr + j, 1) != next_byte)
-            print(next_byte.to_bytes(length=1, byteorder='big'))
             if not solver.check():
                 results[str(j)] = next_byte #.to_bytes(length=1, byteorder='big')
         return results
