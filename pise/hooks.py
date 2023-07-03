@@ -61,16 +61,16 @@ class LibcCallSite(CallSite):
 
     def set_hook(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> None:
         engine.hooks.add(maat.EVENT.EXEC, maat.WHEN.AFTER, filter=sym_ex_maat.BASE_ADDR + self.offset_plt_ent,
-                         callbacks=[self.make_callback()])
+                         callbacks=[self.make_callback(pise_attr)])
 
-    def execute_callback(self, engine: maat.MaatEngine) -> maat.ACTION:
+    def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes = None) -> maat.ACTION:
         engine.cpu.rax = engine.cpu.rdi
         # logger.debug(engine.mem)
         CallSite.do_ret_from_plt(engine)
         return maat.ACTION.CONTINUE
 
-    def make_callback(self):
-        return lambda engine: self.execute_callback(engine)
+    def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes = None):
+        return lambda engine: self.execute_callback(engine, pise_attr)
 
 
 class HtonsHook(LibcCallSite):
