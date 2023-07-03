@@ -94,14 +94,18 @@ class StrcmpHook(LibcCallSite):
         s1_ptr = engine.cpu.rdi
         s2_ptr = engine.cpu.rsi
         if engine.mem.read(s1_ptr.as_uint(),1).is_concolic(engine.vars):
+            CallSite.do_ret_from_plt(engine)
+            pise_attr.save_engine_state(engine)
+            pise_attr.add_constraint(engine.cpu.rax == 0)
             idx = 0
             while True:
-                ch = engine.mem.read(s2_ptr.as_uint(), 1).as_uint()
+                ch = engine.mem.read(s2_ptr.as_uint(), 1)
                 pise_attr.add_constraint(engine.mem.read(s1_ptr.as_uint()+idx, 1) == ch)
-                if ch == 0x0:
+                if ch.as_uint() == 0x0:
                     break
-                idx+=1
-        CallSite.do_ret_from_plt(engine)
+                idx += 1
+            if not pise_attr.gen_solver().check():
+                pise_attr.pop_engine_state(engine)
         return maat.ACTION.CONTINUE
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes = None):
@@ -115,18 +119,14 @@ class NetHook:
         self.callsite_handler = callsite_handler
         self.type = None
 
-    def gen_probing_results(self, engine: maat.MaatEngine, buffer_addr, length):
-        results = []
-        for i in range(NUM_SOL):
-            results.append(b'')
-            for j in range(length):
-                results[-1] += engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars).to_bytes(length=1,
-                                                                                                 byteorder='big')
-                '''val = engine.mem.read(buffer_addr+j, 1)
-                if val.is_concrete() or val.is_concolic():
-                    results[-1] += val.as_uint().to_bytes(length=1, byteorder='big')
-                else:
-                    results[-1] += val.as_uint(engine.vars).to_bytes(length=1, byteorder='big')'''
+    def gen_probing_results(self, engine: maat.MaatEngine, buffer_addr, length, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> dict:
+        results = dict()
+        for j in range(length):
+            next_byte = engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars).to_bytes(length=1, byteorder='big')
+            solver = pise_attr.gen_solver()
+            solver.add(engine.mem.read(buffer_addr + j, 1) != next_byte)
+            if not solver.check():
+                results[str(j)] = next_byte
         return results
 
     @staticmethod
@@ -135,8 +135,7 @@ class NetHook:
 
     def probe_recv_at_next_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
         print('Adding RECV symbol')
-        predicate = extract_predicate(
-            self.gen_probing_results(engine, pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length))
+        predicate = self.gen_probing_results(engine, pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length, pise_attr)
         sym = entities.MessageTypeSymbol(RecvHook.RECEIVE_STRING, extract_name(predicate), predicate)
         pise_attr.new_syms.append(sym)
         print(sym.__dict__)
@@ -181,7 +180,7 @@ class SendHook(NetHook):
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 length = length_arg.as_uint(pise_attr.make_model())
-                predicate = extract_predicate(self.gen_probing_results(engine, buffer_addr, length))
+                predicate = self.gen_probing_results(engine, buffer_addr, length, pise_attr)
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
                 print(sym.__dict__)
