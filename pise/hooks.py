@@ -110,6 +110,9 @@ class StrcmpHook(LibcCallSite):
                 if ch.as_uint(engine.vars) == 0x0 or not pise_attr.gen_solver().check():
                     break
                 idx += 1
+            if not engine.cpu.rax.is_concolic(engine.vars):
+                engine.cpu.rax = maat.Var(64, "rax")
+                engine.vars.set("rax", engine.cpu.rax.as_uint())
             pise_attr.add_constraint(engine.cpu.rax == 0)
             if not pise_attr.gen_solver().check():
                 print("UNSAT STRCMP")
