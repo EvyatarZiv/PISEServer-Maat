@@ -12,6 +12,7 @@ SCANF_OFFSET = 0x11e4
 RECV_OFFSET = 0x1134
 SEND_OFFSET = 0x1174
 PRINTF_OFFSET = 0x1184
+STRCMP_OFFSET = 0x11B4
 
 class ToySendHook(hooks.CallSite):
 
@@ -59,7 +60,7 @@ def main():
                                             hooks.SocketHook(SOCKET_OFFSET),
                                             hooks.ConnectHook(CONNECT_OFFSET),
                                             hooks.LibcCallSite(PRINTF_OFFSET),
-                                            ToyScanfHook(SCANF_OFFSET)], MAIN_OFFSET)
+                                            ToyScanfHook(SCANF_OFFSET), hooks.StrcmpHook(STRCMP_OFFSET)], MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
 
