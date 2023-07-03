@@ -225,7 +225,7 @@ class RecvHook(NetHook):
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 pise_attr.pending_buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 pise_attr.pending_buffer_length = length_arg.as_uint(pise_attr.make_model())
-                engine.mem.make_concolic(pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length, 1, "msg_%d" % pise_attr.idx)
+                engine.mem.make_symbolic(pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length, 1, "msg_%d" % pise_attr.idx)
                 LibcCallSite.do_ret_from_plt(engine)
                 return maat.ACTION.CONTINUE
             print('Recv next callback @ recv')
