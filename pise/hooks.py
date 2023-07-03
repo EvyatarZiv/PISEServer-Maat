@@ -122,11 +122,11 @@ class NetHook:
     def gen_probing_results(self, engine: maat.MaatEngine, buffer_addr, length, pise_attr: sym_ex_helpers_maat.PISEAttributes) -> dict:
         results = dict()
         for j in range(length):
-            next_byte = engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars).to_bytes(length=1, byteorder='big')
+            next_byte = engine.mem.read(buffer_addr + j, 1).as_uint(engine.vars)
             solver = pise_attr.gen_solver()
             solver.add(engine.mem.read(buffer_addr + j, 1) != next_byte)
             if not solver.check():
-                results[str(j)] = next_byte
+                results[str(j)] = next_byte.to_bytes(length=1, byteorder='big')
         return results
 
     @staticmethod
