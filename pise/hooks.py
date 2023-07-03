@@ -93,10 +93,14 @@ class StrcmpHook(LibcCallSite):
         # logger.debug(engine.mem)
         s1_ptr = engine.cpu.rdi
         s2_ptr = engine.cpu.rsi
+        if not pise_attr.gen_solver().check():
+            print("PREUNSAT STRCMP")
+            print(pise_attr.gen_conditions())
+            print(engine.vars)
+            pise_attr.pop_engine_state(engine)
         if engine.mem.read(s1_ptr.as_uint(),1).is_concolic(engine.vars):
             CallSite.do_ret_from_plt(engine)
             pise_attr.save_engine_state(engine)
-            pise_attr.add_constraint(engine.cpu.rax == 0)
             idx = 0
             while True:
                 ch = engine.mem.read(s2_ptr.as_uint(engine.vars)+idx, 1)
@@ -106,6 +110,7 @@ class StrcmpHook(LibcCallSite):
                 if ch.as_uint(engine.vars) == 0x0 or not pise_attr.gen_solver().check():
                     break
                 idx += 1
+            pise_attr.add_constraint(engine.cpu.rax == 0)
             if not pise_attr.gen_solver().check():
                 print("UNSAT STRCMP")
                 print(pise_attr.gen_conditions())
