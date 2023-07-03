@@ -113,7 +113,7 @@ class PISEAttributes:
     DEBUG_COUNTER = 0
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
-        if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond')):
+        if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond') and hasattr(engine.info.branch, 'taken')):
             return maat.ACTION.CONTINUE
         cond = None
         if engine.info.branch.taken:
