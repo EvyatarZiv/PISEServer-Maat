@@ -111,6 +111,7 @@ class StrcmpHook(LibcCallSite):
                     break
                 idx += 1
             if not engine.cpu.rax.is_concolic(engine.vars):
+                print("Made concolic RAX")
                 engine.vars.set("rax", engine.cpu.rax.as_uint())
                 engine.cpu.rax = maat.Var(64, "rax")
             pise_attr.add_constraint(engine.cpu.rax == 0)
@@ -119,6 +120,8 @@ class StrcmpHook(LibcCallSite):
                 print(pise_attr.gen_conditions())
                 print(engine.vars)
                 pise_attr.pop_engine_state(engine)
+            else:
+                print("STRCMP SAT")
         return maat.ACTION.CONTINUE
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes = None):

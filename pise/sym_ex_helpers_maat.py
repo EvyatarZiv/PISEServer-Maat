@@ -74,7 +74,8 @@ class PISEAttributes:
         self.solver = self.gen_solver()
 
     def make_model(self) -> maat.VarContext:
-        self.solver.check()
+        if not self.solver.check():
+            print(self._solvers[-1])
         return self.solver.get_model()
 
     def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False) -> None:
