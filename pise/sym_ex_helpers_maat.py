@@ -131,7 +131,10 @@ class PISEAttributes:
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
             self.solver.add(cond)
-            engine.vars.update_from(self.make_model())
+            if not self.solver.check():
+                self.pop_engine_state(engine)
+            else:
+                engine.vars.update_from(self.make_model())
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
