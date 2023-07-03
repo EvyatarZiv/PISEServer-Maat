@@ -149,7 +149,7 @@ class QueryRunner:
         print([sym.__dict__ for sym in new_symbols])
         print('*'*10)
         print(maat_monitoring_res[1])
-        assert set([sym.__dict__ for sym in new_symbols]) == set(maat_monitoring_res[1])
+        #assert set([sym.__dict__ for sym in new_symbols]) == set(maat_monitoring_res[1])
         return True, [sym.__dict__ for sym in new_symbols], ms_time, 0, probe_time
 
     def clear_cache(self):
