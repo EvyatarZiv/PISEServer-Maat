@@ -95,8 +95,8 @@ class StrcmpHook(LibcCallSite):
         s2_ptr = engine.cpu.rsi
         if not pise_attr.gen_solver().check():
             print("PREUNSAT STRCMP")
-            print(pise_attr.gen_conditions())
-            print(engine.vars)
+            #print(pise_attr.gen_conditions())
+            #print(engine.vars)
             pise_attr.pop_engine_state(engine)
         if engine.mem.read(s1_ptr.as_uint(),1).is_concolic(engine.vars):
             CallSite.do_ret_from_plt(engine)
@@ -111,14 +111,14 @@ class StrcmpHook(LibcCallSite):
                     break
                 idx += 1
             if not engine.cpu.rax.is_concolic(engine.vars):
-                print("Made concolic RAX")
+                #print("Made concolic RAX")
                 engine.vars.set("rax", engine.cpu.rax.as_uint())
                 engine.cpu.rax = maat.Var(64, "rax")
             pise_attr.add_constraint(engine.cpu.rax == 0)
             if not pise_attr.gen_solver().check():
                 print("UNSAT STRCMP")
-                print(pise_attr.gen_conditions())
-                print(engine.vars)
+                #print(pise_attr.gen_conditions())
+                #print(engine.vars)
                 pise_attr.pop_engine_state(engine)
             else:
                 print("STRCMP SAT")

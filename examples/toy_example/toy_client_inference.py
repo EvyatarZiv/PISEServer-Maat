@@ -45,7 +45,8 @@ def main():
                                               toy_client_inference_maat.ToyRecvHook(),
                                               hooks.SocketHook(SOCKET_OFFSET),
                                               hooks.ConnectHook(CONNECT_OFFSET),
-                                              toy_client_inference_maat.ToyScanfHook(toy_client_inference_maat.SCANF_OFFSET)],
+                                              toy_client_inference_maat.ToyScanfHook(toy_client_inference_maat.SCANF_OFFSET),
+                                              hooks.StrcmpHook(toy_client_inference_maat.STRCMP_OFFSET)],
                                              MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
