@@ -81,7 +81,6 @@ class PISEAttributes:
         self._solvers = entry[2]
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
-        assert not self.state_manager.dequeue_state(engine)
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
         return engine
 
@@ -166,6 +165,7 @@ class PISEAttributes:
         if sl.check():
             # logger.debug('Invert saved')
             self.save_engine_state(engine)
+            assert len(self._solvers) > 1
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
             self.solver.add(cond)
