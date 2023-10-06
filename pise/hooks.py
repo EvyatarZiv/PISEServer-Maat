@@ -97,7 +97,7 @@ class StrcmpHook(LibcCallSite):
         s1_ptr = engine.cpu.rdi
         s2_ptr = engine.cpu.rsi
         if not pise_attr.gen_solver().check():
-            # logger.debug("PREUNSAT STRCMP")
+            logger.debug("PREUNSAT STRCMP")
             # logger.debug(pise_attr.gen_conditions())
             # logger.debug(engine.vars)
             pise_attr.pop_engine_state(engine)
