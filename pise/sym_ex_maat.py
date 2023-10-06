@@ -56,6 +56,7 @@ class QueryRunner:
             elif stop_res == maat.STOP.HOOK:
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     logger.debug("MAAT query is true")
+                    self.pise_attr.cache_state(self.pise_attr.inputs, self.engine)
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
                 if not self.advance_state():
@@ -112,5 +113,4 @@ class QueryRunner:
             return False, None, 0, 0, 0  # Membership is false
         if len(inputs) == 0:
             self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
-        self.pise_attr.cache_state(inputs, self.engine)
         return True, self.do_probing(), 0, 0, 0
