@@ -31,7 +31,7 @@ class QueryRunner:
                               filter=self.addr_main + BASE_ADDR)
         self.engine.run()
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
-        logger.debug(self.engine.hooks)
+        #logger.debug(self.engine.hooks)
 
     def set_membership_hooks(self) -> None:
         logger.info('Setting hooks')
@@ -48,8 +48,8 @@ class QueryRunner:
     def do_query_loop(self):
         res = False
         while True:
-            if self.pise_attr.probing:
-                logger.debug(self.engine.cpu.rip)
+            """if self.pise_attr.probing:
+                logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
             logger.debug('State dequeue')
             if stop_res == maat.STOP.EXIT:
