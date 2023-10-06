@@ -60,6 +60,7 @@ class QueryRunner:
                     self.pise_attr.cache_state(self.pise_attr.inputs, self.engine)
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
+                    logger.debug("Finished caching")
                 if not self.advance_state():
                     return res
                 continue
