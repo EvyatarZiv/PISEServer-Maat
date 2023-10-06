@@ -47,6 +47,7 @@ class QueryRunner:
         res = False
         while True:
             logger.debug(f'State dequeued with rip {self.engine.cpu.rip}')
+            logger.debug(f'Number of cond lists is {self.pise_attr._solvers}')
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
@@ -104,7 +105,7 @@ class QueryRunner:
             logger.debug(f'Prefix {best_pref} found!')
             self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
             # self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
-            #logger.debug(f'{self.engine.cpu.rip}')
+            # logger.debug(f'{self.engine.cpu.rip}')
             # self.engine.settings.log_insts = True
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
