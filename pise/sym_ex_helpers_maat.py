@@ -5,7 +5,7 @@ from copy import deepcopy
 import os
 import logging
 
-logger = logging.getLogger('pise')
+logger = logging.getLogger(__name__)
 
 TEMP_PATH = "./pise/tmp"
 INIT_STATE_PATH = "./pise/tmp/init_state"
@@ -54,11 +54,13 @@ class PISEAttributes:
         return engine
 
     def cache_state(self, state, engine):
+        global NCACHED
         path = TEMP_PATH + f'/{NCACHED}'
         os.system(f'mkdir {path}')
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
         self.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1], self.idx)
+        NCACHED += 1
 
     def get_best_cached_prefix(self, state):
         best_pref = None

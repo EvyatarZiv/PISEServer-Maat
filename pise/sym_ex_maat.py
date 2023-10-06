@@ -17,7 +17,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        # logging.info(self.engine.mem)
+        # logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
 
@@ -31,10 +31,10 @@ class QueryRunner:
                               filter=self.addr_main + BASE_ADDR)
         self.engine.run()
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
-        #logging.info(self.engine.hooks)
+        #logger.debug(self.engine.hooks)
 
     def set_membership_hooks(self) -> None:
-        logging.info('Setting hooks')
+        logger.debug('Setting hooks')
         for callsite in self.callsites_to_monitor:
             callsite.set_hook(self.engine, self.pise_attr)
 
@@ -49,23 +49,23 @@ class QueryRunner:
         res = False
         while True:
             """if self.pise_attr.probing:
-                logging.info(self.engine.cpu.rip)"""
+                logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
-            logging.info('State dequeue')
+            logger.debug('State dequeue')
             if stop_res == maat.STOP.EXIT:
                 if not self.advance_state():
                     return res
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
-                    logging.info("MAAT query is true")
+                    logger.debug("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
                 if not self.advance_state():
                     return res
                 continue
             else:
-                logging.info(self.engine.cpu.rip)
+                logger.debug(self.engine.cpu.rip)
                 raise NotImplementedError
 
     def do_monitoring(self) -> bool:
@@ -76,7 +76,7 @@ class QueryRunner:
         self.pise_attr.begin_probing()
         if not self.advance_state():
             return []
-        logging.info('Starting probing')
+        logger.debug('Starting probing')
         self.do_query_loop()
         self.probe_cache.insert(self.pise_attr.inputs, self.pise_attr.new_syms)
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
@@ -85,10 +85,10 @@ class QueryRunner:
         """
         :param inputs: List of MessageTypeSymbol objects
         """
-        logging.info('Performing membership, step by step')
-        logging.info('Query: %s' % inputs)
+        logger.debug('Performing membership, step by step')
+        logger.debug('Query: %s' % inputs)
         if self.probe_cache.has_contradiction(inputs):
-            logging.info('Rejected by probing cache')
+            logger.debug('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
