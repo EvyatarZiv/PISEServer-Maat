@@ -15,6 +15,7 @@ NCACHED = 0
 
 class PISEAttributes:
     init_manager = maat.SimpleStateManager(INIT_STATE_PATH)
+    state_cache_map = {}
 
     def __init__(self, inputs):
         self.inputs = inputs
@@ -34,8 +35,6 @@ class PISEAttributes:
         self.pending_buffer_addr = None
         self.pending_buffer_length = None
         self._pending_queue = []
-
-        self.state_cache_map = {}
 
     def begin_probing(self):
         self.state_manager = self.probing_stash
@@ -59,13 +58,13 @@ class PISEAttributes:
         os.system(f'mkdir {path}')
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
-        self.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
+        PISEAttributes.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
         NCACHED += 1
 
     def get_best_cached_prefix(self, state):
         best_pref = None
-        logger.debug(f'{state},{self.state_cache_map}')
-        for pref in self.state_cache_map.keys():
+        logger.debug(f'{state},{PISEAttributes.state_cache_map}')
+        for pref in PISEAttributes.state_cache_map.keys():
             if len(pref) < len(state):
                 if list(pref) == state[:len(pref)]:
                     if best_pref is None or len(list(best_pref)) < len(list(pref)):
@@ -73,7 +72,7 @@ class PISEAttributes:
         return best_pref
 
     def set_cached_state(self, state, engine):
-        entry = self.state_cache_map[state]
+        entry = PISEAttributes.state_cache_map[state]
         entry[0].dequeue_state(engine)
         self.solver = entry[1]
         self._solvers = [entry[2]]
