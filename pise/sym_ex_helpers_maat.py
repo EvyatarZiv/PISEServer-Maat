@@ -78,7 +78,7 @@ class PISEAttributes:
         entry[0].dequeue_state(engine)
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
-        self._solvers = [entry[2]]
+        self._solvers = [entry[2], []]
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         return engine
@@ -131,7 +131,6 @@ class PISEAttributes:
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
-        assert self._solvers != []
         self.solver = self.gen_solver()
         pop_success = self.state_manager.dequeue_state(engine)
         if pop_success:
