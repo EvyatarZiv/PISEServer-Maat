@@ -150,7 +150,6 @@ class PISEAttributes:
         if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond') and hasattr(engine.info.branch,
                                                                                                    'taken')):
             return maat.ACTION.CONTINUE
-        logger.debug(f'Branch callback @ {engine.cpu.rip}')
         cond = None
         if engine.info.branch.taken:
             # logger.debug("TAKEN")
@@ -159,6 +158,8 @@ class PISEAttributes:
             # logger.debug("NOT TAKEN")
             cond = engine.info.branch.cond.invert()
         sl = self.gen_solver()
+        if self._solvers == []:
+            logger.debug(f'Empty _solvers @ {engine.cpu.rip}')
         sl.add(cond.invert())
         if sl.check():
             # logger.debug('Invert saved')
