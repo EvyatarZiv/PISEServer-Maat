@@ -150,6 +150,7 @@ class PISEAttributes:
         if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond') and hasattr(engine.info.branch,
                                                                                                    'taken')):
             return maat.ACTION.CONTINUE
+        logger.debug(f'Branch callback @ {engine.cpu.rip}')
         cond = None
         if engine.info.branch.taken:
             # logger.debug("TAKEN")
