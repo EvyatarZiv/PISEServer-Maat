@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-from pise import sym_ex_helpers_maat
+from pise import sym_ex_helpers_maat, cache, hooks
 import logging
 import maat
-from pise import cache
-
-import hooks
 
 logger = logging.getLogger('pise')
 BASE_ADDR = 0x04000000
