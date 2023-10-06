@@ -48,8 +48,6 @@ class QueryRunner:
 
         # Check cache if we have states available for a prefix of our query
         cached_prefix_len, cached_states = self.cache.lookup(inputs)
-        cached_prefix_len = 0
-        cached_states = None
 
         if cached_states is not None:
             # If we found anything in the cache, just register those states with the monitor plugin
