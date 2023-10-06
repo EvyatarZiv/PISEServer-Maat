@@ -174,10 +174,10 @@ class NetHook:
 
             pise_attr.add_constraint(symb_byte == value)
         res = pise_attr.make_model()
+        LibcCallSite.do_ret_from_plt(engine)
         if res is None:
             return maat.ACTION.HALT
         pise_attr.idx += 1
-        LibcCallSite.do_ret_from_plt(engine)
         engine.vars.update_from(res)
         return maat.ACTION.CONTINUE if not NetHook.check_monitoring_complete(pise_attr) else maat.ACTION.HALT
 
@@ -245,7 +245,7 @@ class RecvHook(NetHook):
         if NetHook.check_monitoring_complete(pise_attr) or pise_attr.inputs[
             pise_attr.idx].type != RecvHook.RECEIVE_STRING:
             #pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
-            LibcCallSite.do_ret_from_plt(engine)
+            #LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         return self.execute_net_callback(engine, pise_attr)
 
