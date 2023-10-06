@@ -56,6 +56,7 @@ class PISEAttributes:
         global NCACHED
         path = TEMP_PATH + f'/{NCACHED}'
         os.system(f'mkdir {path}')
+        logger.debug(f'Caching state with rip={engine.cpu.rip}')
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
         PISEAttributes.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
