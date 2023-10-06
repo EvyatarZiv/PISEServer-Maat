@@ -109,7 +109,7 @@ class QueryRunner:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
             logger.debug('No prefix found')
         self.set_membership_hooks()
-        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.AFTER,
+        self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
