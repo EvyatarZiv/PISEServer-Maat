@@ -81,7 +81,7 @@ class PISEAttributes:
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
         self._solvers = entry[2]
-        assert self._solvers != []
+        assert self._solvers != [] and self._debug_nstates_enq == 0
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
@@ -137,7 +137,7 @@ class PISEAttributes:
 
         if not self.probing:
             if not (len(self._solvers) == (self._debug_nstates_enq + 1)):
-                logging.debug(f'{self._debug_nstates_enq}, {len(self._solvers)}')
+                logging.debug(f'{self._debug_nstates_enq}, {len(self._solvers)}, {engine.cpu.rip}')
             assert (len(self._solvers) == (self._debug_nstates_enq + 1))
 
 
