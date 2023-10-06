@@ -92,9 +92,8 @@ class QueryRunner:
             logger.debug('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
-        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        self.set_membership_hooks()
+        #self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
+        #self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
 
         logger.debug('Searching cache for prefix:')
         best_pref = self.pise_attr.get_best_cached_prefix(inputs)
@@ -105,6 +104,7 @@ class QueryRunner:
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
             logger.debug('No prefix found')
+        self.set_membership_hooks()
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
