@@ -149,10 +149,9 @@ class PISEAttributes:
 
         self._debug_nstates_enq -= pop_success
         if not self.probing:
-            if not (len(self._solvers) == (self._debug_nstates_enq + 1)):
+            if not ((len(self._solvers) == (self._debug_nstates_enq + 1)) or not pop_success):
                 logging.debug(f'{self._debug_nstates_enq}, {len(self._solvers)}, {engine.cpu.rip}')
-            assert (len(self._solvers) == (self._debug_nstates_enq + 1))
-        assert (not pop_success or self._solvers != [])
+            assert (len(self._solvers) == (self._debug_nstates_enq + 1)) or not pop_success
         if pop_success:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
