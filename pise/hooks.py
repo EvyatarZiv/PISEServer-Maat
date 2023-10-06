@@ -200,16 +200,17 @@ class SendHook(NetHook):
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
                 #logger.debug(sym.__dict__)
+                LibcCallSite.do_ret_from_plt(engine)
                 return maat.ACTION.HALT
             #logger.debug('Recv next callback @ send')
             self.probe_recv_at_next_callback(engine, pise_attr)
+            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         if pise_attr.inputs[pise_attr.idx].type != SendHook.SEND_STRING:
             return maat.ACTION.HALT
         action = self.execute_net_callback(engine, pise_attr)
         # logger.debug('Checking satisfiability')
         if action == maat.ACTION.HALT or not pise_attr.solver.check():
-            LibcCallSite.do_ret_from_plt(engine)
             return maat.ACTION.HALT
         if NetHook.check_monitoring_complete(pise_attr):
             #pise_attr.probing = NetHook.check_monitoring_complete(pise_attr)
