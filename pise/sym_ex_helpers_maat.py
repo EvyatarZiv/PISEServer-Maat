@@ -36,6 +36,8 @@ class PISEAttributes:
         self.pending_buffer_length = None
         self._pending_queue = []
 
+        self._debug_nstates_enq = 0
+
     def begin_probing(self):
         self.state_manager = self.probing_stash
         self.indices = self.probing_indices
@@ -78,7 +80,8 @@ class PISEAttributes:
         entry[0].dequeue_state(engine)
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
-        self._solvers = entry[2] + [[]]
+        self._solvers = entry[2]
+        assert self._solvers != []
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
@@ -119,6 +122,8 @@ class PISEAttributes:
         manager.enqueue_state(engine)
         sl = self.gen_conditions(stash_for_probing)
 
+        self._debug_nstates_enq += not stash_for_probing
+
         if stash_for_probing:
             self._probing_solvers = [sl] + self._probing_solvers
             self.probing_indices = [self.idx] + self.probing_indices
@@ -129,6 +134,8 @@ class PISEAttributes:
         if self.probing or stash_for_probing:
             self._pending_queue = [(self.pending_buffer_addr, self.pending_buffer_length,
                                     self.pending_probe)] + self._pending_queue
+
+        assert (len(self._solvers) == (self._debug_nstates_enq + 1))
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
