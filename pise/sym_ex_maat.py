@@ -92,8 +92,8 @@ class QueryRunner:
             logger.debug('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-        #self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
-        #self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
+        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
+        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
 
         logger.debug('Searching cache for prefix:')
         best_pref = self.pise_attr.get_best_cached_prefix(inputs)
