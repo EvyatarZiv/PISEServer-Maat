@@ -77,7 +77,7 @@ class PISEAttributes:
         entry[0].dequeue_state(engine)
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
-        self._solvers = [entry[2]]
+        self._solvers = [entry[2], entry[2]]
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         return engine
@@ -158,8 +158,6 @@ class PISEAttributes:
             # logger.debug("NOT TAKEN")
             cond = engine.info.branch.cond.invert()
         sl = self.gen_solver()
-        if self._solvers == []:
-            logger.debug(f'Empty _solvers @ {engine.cpu.rip}')
         sl.add(cond.invert())
         if sl.check():
             # logger.debug('Invert saved')
