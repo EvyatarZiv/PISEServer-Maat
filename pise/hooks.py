@@ -101,6 +101,7 @@ class StrcmpHook(LibcCallSite):
             # logger.debug(pise_attr.gen_conditions())
             # logger.debug(engine.vars)
             pise_attr.pop_engine_state(engine)
+            return maat.ACTION.HALT
         if engine.mem.read(s1_ptr.as_uint(), 1).is_concolic(engine.vars):
             CallSite.do_ret_from_plt(engine)
             pise_attr.save_engine_state(engine)
