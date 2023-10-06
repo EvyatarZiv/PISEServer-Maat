@@ -60,7 +60,7 @@ class PISEAttributes:
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
         PISEAttributes.state_cache_map[tuple(state)] = (
-            manager, self.solver, self._solvers[-2:], self.idx)
+            manager, self.solver, self._solvers[-1:] if self._solvers != [] else [[]], self.idx)
         NCACHED += 1
 
     def get_best_cached_prefix(self, state):
@@ -79,7 +79,6 @@ class PISEAttributes:
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
         self._solvers = entry[2]
-        assert (len(self._solvers) > 1)
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
@@ -135,6 +134,7 @@ class PISEAttributes:
         self._solvers = self._solvers[:-1]
         self.solver = self.gen_solver()
         pop_success = self.state_manager.dequeue_state(engine)
+        assert (not pop_success or self._solvers != [])
         if pop_success:
             self.idx = self.indices[-1]
             self.indices = self.indices[:-1]
