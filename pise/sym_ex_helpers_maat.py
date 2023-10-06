@@ -136,7 +136,10 @@ class PISEAttributes:
                                     self.pending_probe)] + self._pending_queue
 
         if not self.probing:
+            if not (len(self._solvers) == (self._debug_nstates_enq + 1)):
+                logging.debug(f'{self._debug_nstates_enq}, {len(self._solvers)}')
             assert (len(self._solvers) == (self._debug_nstates_enq + 1))
+
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
