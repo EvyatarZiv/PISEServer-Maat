@@ -59,12 +59,13 @@ class PISEAttributes:
         logger.debug(f'Caching state with rip={engine.cpu.rip}')
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
-        PISEAttributes.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
+        PISEAttributes.state_cache_map[tuple(state)] = (
+        manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
         NCACHED += 1
 
     def get_best_cached_prefix(self, state):
         best_pref = None
-        #logger.debug(f'{state},{PISEAttributes.state_cache_map}')
+        # logger.debug(f'{state},{PISEAttributes.state_cache_map}')
         for pref in PISEAttributes.state_cache_map.keys():
             if len(pref) < len(state):
                 if list(pref) == state[:len(pref)]:
@@ -129,6 +130,7 @@ class PISEAttributes:
                                     self.pending_probe)] + self._pending_queue
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
+        assert self._solvers != []
         self._solvers = self._solvers[:-1]
         self.solver = self.gen_solver()
         pop_success = self.state_manager.dequeue_state(engine)
