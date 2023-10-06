@@ -47,7 +47,6 @@ class QueryRunner:
         res = False
         while True:
             logger.debug(f'State dequeued with rip {self.engine.cpu.rip}')
-            logger.debug(f'Number of cond lists is {len(self.pise_attr._solvers)}')
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
