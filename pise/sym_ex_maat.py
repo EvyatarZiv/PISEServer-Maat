@@ -5,6 +5,8 @@ import logging
 import maat
 from pise import cache
 
+import hooks
+
 logger = logging.getLogger('pise')
 BASE_ADDR = 0x04000000
 LIB64_PATH = "./lib64"
@@ -102,6 +104,7 @@ class QueryRunner:
             self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
             logger.debug(f'Prefix {best_pref} found!')
             logger.debug(f'{self.engine.cpu.rip}')
+            hooks.CallSite.do_ret_from_plt(self.engine)
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
             logger.debug('No prefix found')
