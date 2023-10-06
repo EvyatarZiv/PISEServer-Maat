@@ -74,6 +74,7 @@ class PISEAttributes:
     def set_cached_state(self, state, engine):
         entry = PISEAttributes.state_cache_map[state]
         entry[0].dequeue_state(engine)
+        entry[0].enqueue_state(engine)
         self.solver = entry[1]
         self._solvers = [entry[2]]
         self.idx = entry[3]
