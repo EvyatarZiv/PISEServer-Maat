@@ -17,7 +17,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        # logger.debug(self.engine.mem)
+        # logger.info(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
 
@@ -31,7 +31,7 @@ class QueryRunner:
                               filter=self.addr_main + BASE_ADDR)
         self.engine.run()
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
-        #logger.debug(self.engine.hooks)
+        #logger.info(self.engine.hooks)
 
     def set_membership_hooks(self) -> None:
         logger.info('Setting hooks')
@@ -49,23 +49,23 @@ class QueryRunner:
         res = False
         while True:
             """if self.pise_attr.probing:
-                logger.debug(self.engine.cpu.rip)"""
+                logger.info(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
-            logger.debug('State dequeue')
+            logger.info('State dequeue')
             if stop_res == maat.STOP.EXIT:
                 if not self.advance_state():
                     return res
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
-                    logger.debug("MAAT query is true")
+                    logger.info("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
                 if not self.advance_state():
                     return res
                 continue
             else:
-                logger.debug(self.engine.cpu.rip)
+                logger.info(self.engine.cpu.rip)
                 raise NotImplementedError
 
     def do_monitoring(self) -> bool:
@@ -76,7 +76,7 @@ class QueryRunner:
         self.pise_attr.begin_probing()
         if not self.advance_state():
             return []
-        logger.debug('Starting probing')
+        logger.info('Starting probing')
         self.do_query_loop()
         self.probe_cache.insert(self.pise_attr.inputs, self.pise_attr.new_syms)
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
@@ -86,24 +86,26 @@ class QueryRunner:
         :param inputs: List of MessageTypeSymbol objects
         """
         logger.info('Performing membership, step by step')
-        logger.debug('Query: %s' % inputs)
+        logger.info('Query: %s' % inputs)
         if self.probe_cache.has_contradiction(inputs):
-            logger.debug('Rejected by probing cache')
+            logger.info('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
-        else:
-            # If we haven't found anything in cache, just start from the beginning
-            logger.info('No prefix exists in cache, starting from the beginning')
-            # self.pise_attr.inputs = inputs
         self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
 
-        self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+        best_pref = self.pise_attr.get_best_cached_prefix(inputs)
+
+        if best_pref is not None:
+            self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
+        else:
+            self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         if len(inputs) == 0:
             self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
+        self.pise_attr.cache_state(inputs, self.engine)
         return True, self.do_probing(), 0, 0, 0

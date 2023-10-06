@@ -10,6 +10,7 @@ logger = logging.getLogger('pise')
 TEMP_PATH = "./pise/tmp"
 INIT_STATE_PATH = "./pise/tmp/init_state"
 PROBING_PATH = "./pise/tmp/probing"
+NCACHED = 0
 
 
 class PISEAttributes:
@@ -34,6 +35,8 @@ class PISEAttributes:
         self.pending_buffer_length = None
         self._pending_queue = []
 
+        self.state_cache_map = {}
+
     def begin_probing(self):
         self.state_manager = self.probing_stash
         self.indices = self.probing_indices
@@ -48,6 +51,30 @@ class PISEAttributes:
     def set_init_state(engine):
         assert PISEAttributes.init_manager.dequeue_state(engine)
         PISEAttributes.init_manager.enqueue_state(engine)
+        return engine
+
+    def cache_state(self, state, engine):
+        path = TEMP_PATH + f'/{NCACHED}'
+        os.system(f'mkdir {path}')
+        manager = maat.SimpleStateManager(path)
+        manager.enqueue_state(engine)
+        self.state_cache_map[state] = (manager, self.solver, self._solvers[-1], self.idx)
+
+    def get_best_cached_prefix(self, state):
+        best_pref = None
+        for pref in self.state_cache_map.keys():
+            if len(pref) < len(state):
+                if list(pref) == state[:len(pref)]:
+                    if best_pref is None or len(list(best_pref)) < len(list(pref)):
+                        best_pref = pref
+        return best_pref
+
+    def set_cached_state(self, state, engine):
+        entry = self.state_cache_map[state]
+        entry[0].dequeue_state(engine)
+        self.solver = entry[1]
+        self._solvers = [entry[2]]
+        self.idx = entry[3]
         return engine
 
     def gen_solver(self) -> maat.Solver:
@@ -93,7 +120,8 @@ class PISEAttributes:
             self.indices = [self.idx] + self.indices
 
         if self.probing or stash_for_probing:
-            self._pending_queue = [(self.pending_buffer_addr, self.pending_buffer_length, self.pending_probe)] + self._pending_queue
+            self._pending_queue = [(self.pending_buffer_addr, self.pending_buffer_length,
+                                    self.pending_probe)] + self._pending_queue
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
         self._solvers = self._solvers[:-1]
@@ -111,11 +139,11 @@ class PISEAttributes:
                 self.pending_buffer_addr, self.pending_buffer_length, self.pending_probe = None, None, False
         return pop_success, engine
 
-
     DEBUG_COUNTER = 0
 
     def execute_branch_callback(self, engine: maat.MaatEngine):
-        if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond') and hasattr(engine.info.branch, 'taken')):
+        if not (hasattr(engine.info, 'branch') and hasattr(engine.info.branch, 'cond') and hasattr(engine.info.branch,
+                                                                                                   'taken')):
             return maat.ACTION.CONTINUE
         cond = None
         if engine.info.branch.taken:
@@ -127,7 +155,7 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
-            #logger.debug('Invert saved')
+            # logger.debug('Invert saved')
             self.save_engine_state(engine)
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
