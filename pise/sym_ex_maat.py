@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pise import sym_ex_helpers_maat, cache, hooks
+from pise import sym_ex_helpers_maat, cache
 import logging
 import maat
 
@@ -100,8 +100,7 @@ class QueryRunner:
         if best_pref is not None:
             self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
             logger.debug(f'Prefix {best_pref} found!')
-            logger.debug(f'{self.engine.cpu.rip}')
-            hooks.CallSite.do_ret_from_plt(self.engine)
+            #logger.debug(f'{self.engine.cpu.rip}')
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
             logger.debug('No prefix found')
