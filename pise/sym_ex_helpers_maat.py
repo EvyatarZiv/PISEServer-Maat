@@ -59,7 +59,7 @@ class PISEAttributes:
         os.system(f'mkdir {path}')
         manager = maat.SimpleStateManager(path)
         manager.enqueue_state(engine)
-        self.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1], self.idx)
+        self.state_cache_map[tuple(state)] = (manager, self.solver, self._solvers[-1] if self._solvers else [], self.idx)
         NCACHED += 1
 
     def get_best_cached_prefix(self, state):
