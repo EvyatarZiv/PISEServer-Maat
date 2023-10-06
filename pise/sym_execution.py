@@ -21,7 +21,7 @@ class QueryRunner:
         self.cache = SimulationCache()
         self.probing_cache = ProbingCache()
 
-        self.maat_queryrunner = sym_ex_maat.QueryRunner(file, maat_callsites, addr_main)
+        #self.maat_queryrunner = sym_ex_maat.QueryRunner(file, maat_callsites, addr_main)
 
     def membership_step_by_step(self, inputs):
         logger.info('Performing membership, step by step')
