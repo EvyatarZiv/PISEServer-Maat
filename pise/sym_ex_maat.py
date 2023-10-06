@@ -46,6 +46,7 @@ class QueryRunner:
     def do_query_loop(self):
         res = False
         while True:
+            logger.debug(f'State dequeued')
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
@@ -70,11 +71,11 @@ class QueryRunner:
         return self.do_query_loop()
 
     def do_probing(self) -> list:
+        logger.debug('Starting probing')
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
         if not self.advance_state():
             return []
-        logger.debug('Starting probing')
         self.do_query_loop()
         self.probe_cache.insert(self.pise_attr.inputs, self.pise_attr.new_syms)
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
