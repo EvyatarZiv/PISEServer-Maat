@@ -130,8 +130,8 @@ class PISEAttributes:
                                     self.pending_probe)] + self._pending_queue
 
     def pop_engine_state(self, engine: maat.MaatEngine) -> (bool, maat.MaatEngine):
-        assert self._solvers != []
         self._solvers = self._solvers[:-1]
+        assert self._solvers != []
         self.solver = self.gen_solver()
         pop_success = self.state_manager.dequeue_state(engine)
         if pop_success:
