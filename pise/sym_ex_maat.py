@@ -102,7 +102,7 @@ class QueryRunner:
             self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
             logger.debug(f'Prefix {best_pref} found!')
             #logger.debug(f'{self.engine.cpu.rip}')
-            self.engine.settings.log_insts = True
+            # self.engine.settings.log_insts = True
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
             logger.debug('No prefix found')
