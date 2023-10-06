@@ -34,7 +34,7 @@ class QueryRunner:
             logger.info('Query Answered by cache, answer is false')
             return False, None, 0, None, None
 
-        try:
+        """try:
             logger.debug(f'Start MAAT')
             maat_monitoring_res = self.maat_queryrunner.membership_step_by_step(inputs)
             logger.debug(f'End MAAT')
@@ -42,7 +42,7 @@ class QueryRunner:
             logger.info(f"MAAT exception")
             exit(1)
         else:
-            logger.info(f"MAAT result: {maat_monitoring_res}")
+            logger.info(f"MAAT result: {maat_monitoring_res}")"""
 
         self.set_membership_hooks()
 
@@ -94,7 +94,7 @@ class QueryRunner:
         if final_stash not in sm.stashes.keys() or len(getattr(sm, final_stash)) == 0:
             # the membership query resulted False
             # TODO: understand if we ever get here at all. Does probing cache always prevents us from getting here?
-            assert(not maat_monitoring_res[0])
+            # assert(not maat_monitoring_res[0])
             return False, None, ms_time, None, None
 
         # Probing phase
@@ -111,9 +111,9 @@ class QueryRunner:
         if len(inputs) > 0 and inputs[len(inputs)-1].type == 'RECEIVE' and ('probing_done' not in sm.stashes.keys() or len(sm.probing_done) == 0):
             logger.info('Query with last symbol recevied is False')
             return False, None, ms_time, None, None
-        logger.debug(maat_monitoring_res[0])
+        """logger.debug(maat_monitoring_res[0])
         if not maat_monitoring_res[0]:
-            exit(0)
+            exit(0)"""
 
         new_symbols = []
 
@@ -145,10 +145,10 @@ class QueryRunner:
 
         # Put probing result in probing cache
         self.probing_cache.insert(inputs, new_symbols)
-        logger.info("Returned")
+        """logger.info("Returned")
         print([sym.__dict__ for sym in new_symbols])
         print('*'*10)
-        print(maat_monitoring_res[1])
+        print(maat_monitoring_res[1])"""
         #assert set([sym.__dict__ for sym in new_symbols]) == set(maat_monitoring_res[1])
         return True, [sym.__dict__ for sym in new_symbols], ms_time, 0, probe_time
 
