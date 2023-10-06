@@ -64,6 +64,7 @@ class PISEAttributes:
 
     def get_best_cached_prefix(self, state):
         best_pref = None
+        logger.debug(f'{state},{self.state_cache_map}')
         for pref in self.state_cache_map.keys():
             if len(pref) < len(state):
                 if list(pref) == state[:len(pref)]:

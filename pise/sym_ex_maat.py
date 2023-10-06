@@ -84,7 +84,7 @@ class QueryRunner:
         :param inputs: List of MessageTypeSymbol objects
         """
         global NQUERIES
-        logger.debug(f'Performed {NQUERIES} query')
+        logger.debug(f'Performed {NQUERIES} queries')
         NQUERIES += 1
         logger.debug('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
