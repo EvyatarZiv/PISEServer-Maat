@@ -117,6 +117,7 @@ class PISEAttributes:
         return self.solver.get_model()
 
     def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False) -> None:
+        assert self._solvers != []
         manager: maat.SimpleStateManager = self.state_manager if not stash_for_probing else self.probing_stash
         solvers = self._solvers if not stash_for_probing else self._probing_solvers
         manager.enqueue_state(engine)
@@ -147,6 +148,10 @@ class PISEAttributes:
         pop_success = self.state_manager.dequeue_state(engine)
 
         self._debug_nstates_enq -= pop_success
+        if not self.probing:
+            if not (len(self._solvers) == (self._debug_nstates_enq + 1)):
+                logging.debug(f'{self._debug_nstates_enq}, {len(self._solvers)}, {engine.cpu.rip}')
+            assert (len(self._solvers) == (self._debug_nstates_enq + 1))
         assert (not pop_success or self._solvers != [])
         if pop_success:
             self.idx = self.indices[-1]
