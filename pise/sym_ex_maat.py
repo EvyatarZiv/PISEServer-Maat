@@ -3,6 +3,7 @@
 from pise import sym_ex_helpers_maat
 import logging
 import maat
+from pise import cache
 
 logger = logging.getLogger(__name__)
 BASE_ADDR = 0x04000000
@@ -19,6 +20,9 @@ class QueryRunner:
         # logger.debug(self.engine.mem)
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
+
+        self.monitor_cache = cache.SimulationCache()
+        self.probe_cache = cache.ProbingCache()
 
         def main_callback(engine):
             return maat.ACTION.HALT
@@ -45,16 +49,16 @@ class QueryRunner:
         res = False
         while True:
             if self.pise_attr.probing:
-                print(self.engine.cpu.rip)
+                logger.debug(self.engine.cpu.rip)
             stop_res = self.engine.run()
-            print('State dequeue')
+            logger.debug('State dequeue')
             if stop_res == maat.STOP.EXIT:
                 if not self.advance_state():
                     return res
                 continue
             elif stop_res == maat.STOP.HOOK:
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
-                    print("MAAT query is true")
+                    logger.debug("MAAT query is true")
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
                 if not self.advance_state():
@@ -72,8 +76,9 @@ class QueryRunner:
         self.pise_attr.begin_probing()
         if not self.advance_state():
             return []
-        print('Starting probing')
+        logger.debug('Starting probing')
         self.do_query_loop()
+        self.probe_cache.insert(self.pise_attr.inputs, self.pise_attr.new_syms)
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
 
     def membership_step_by_step(self, inputs: list):
@@ -86,13 +91,13 @@ class QueryRunner:
         self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
-        if False:
-            # Cache, as of yet unimplemented
-            raise NotImplementedError
+        if self.probe_cache.has_contradiction(inputs):
+            return False, None, 0, 0, 0  # Input contains impossible continuation
         else:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
             # self.pise_attr.inputs = inputs
+
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])

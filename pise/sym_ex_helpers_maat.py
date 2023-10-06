@@ -75,7 +75,7 @@ class PISEAttributes:
 
     def make_model(self) -> maat.VarContext:
         if not self.solver.check():
-            print(self._solvers[-1])
+            logger.debug(self._solvers[-1])
         return self.solver.get_model()
 
     def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False) -> None:
@@ -126,7 +126,7 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
-            #print('Invert saved')
+            #logger.debug('Invert saved')
             self.save_engine_state(engine)
             self._solvers[0].append(cond.invert())
             self._solvers[-1].append(cond)
