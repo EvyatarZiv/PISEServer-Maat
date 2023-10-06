@@ -81,6 +81,7 @@ class PISEAttributes:
         self._solvers = entry[2]
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
+        assert not self.state_manager.dequeue_state(engine)
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
         return engine
 
