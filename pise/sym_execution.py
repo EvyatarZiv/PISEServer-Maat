@@ -30,7 +30,7 @@ class QueryRunner:
 
 
         # Check with probing cache if this query poses an impossible continuation
-        if self.probing_cache.has_contradiction(inputs) and False:
+        if self.probing_cache.has_contradiction(inputs):
             logger.info('Query Answered by cache, answer is false')
             return False, None, 0, None, None
 
