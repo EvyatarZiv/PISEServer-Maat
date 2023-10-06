@@ -8,6 +8,7 @@ from pise import cache
 logger = logging.getLogger('pise')
 BASE_ADDR = 0x04000000
 LIB64_PATH = "./lib64"
+NQUERIES = 0
 
 
 class QueryRunner:
@@ -17,11 +18,9 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s')
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
-
-        self.monitor_cache = cache.SimulationCache()
         self.probe_cache = cache.ProbingCache()
 
         def main_callback(engine):
@@ -31,7 +30,7 @@ class QueryRunner:
                               filter=self.addr_main + BASE_ADDR)
         self.engine.run()
         sym_ex_helpers_maat.PISEAttributes.gen_init_state(self.engine)
-        #logger.debug(self.engine.hooks)
+        # logger.debug(self.engine.hooks)
 
     def set_membership_hooks(self) -> None:
         logger.debug('Setting hooks')
@@ -51,7 +50,6 @@ class QueryRunner:
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
-            logger.debug('State dequeue')
             if stop_res == maat.STOP.EXIT:
                 if not self.advance_state():
                     return res
@@ -85,6 +83,9 @@ class QueryRunner:
         """
         :param inputs: List of MessageTypeSymbol objects
         """
+        global NQUERIES
+        logger.debug(f'Performed {NQUERIES} query')
+        NQUERIES += 1
         logger.debug('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
         if self.probe_cache.has_contradiction(inputs):
@@ -95,12 +96,15 @@ class QueryRunner:
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
 
+        logger.debug('Searching cache for prefix:')
         best_pref = self.pise_attr.get_best_cached_prefix(inputs)
 
         if best_pref is not None:
             self.engine = self.pise_attr.set_cached_state(best_pref, self.engine)
+            logger.debug('Prefix found!')
         else:
             self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
+            logger.debug('No prefix found')
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
         if len(inputs) > 0 and not self.do_monitoring():
