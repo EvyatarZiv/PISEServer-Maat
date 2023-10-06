@@ -87,10 +87,6 @@ class QueryRunner:
         """
         logger.info('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
-        self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
-        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
-        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        self.set_membership_hooks()
         if self.probe_cache.has_contradiction(inputs):
             logger.debug('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
@@ -98,6 +94,10 @@ class QueryRunner:
             # If we haven't found anything in cache, just start from the beginning
             logger.info('No prefix exists in cache, starting from the beginning')
             # self.pise_attr.inputs = inputs
+        self.pise_attr = sym_ex_helpers_maat.PISEAttributes(inputs)
+        self.engine = maat.MaatEngine(maat.ARCH.X64, maat.OS.LINUX)
+        self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
+        self.set_membership_hooks()
 
         self.engine = sym_ex_helpers_maat.PISEAttributes.set_init_state(self.engine)
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
