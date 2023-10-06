@@ -121,7 +121,7 @@ class StrcmpHook(LibcCallSite):
                 engine.cpu.rax = maat.Var(64, "rax")
             pise_attr.add_constraint(engine.cpu.rax == 0)
             if not pise_attr.gen_solver().check():
-                # logger.debug("UNSAT STRCMP")
+                logger.debug("UNSAT STRCMP")
                 # logger.debug(pise_attr.gen_conditions())
                 # logger.debug(engine.vars)
                 pise_attr.pop_engine_state(engine)
