@@ -78,7 +78,7 @@ class PISEAttributes:
         entry[0].dequeue_state(engine)
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
-        self._solvers = [entry[2], []]
+        self._solvers = [entry[2], entry[2]]
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         return engine
