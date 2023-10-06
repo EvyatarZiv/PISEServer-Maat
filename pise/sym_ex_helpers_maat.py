@@ -79,6 +79,7 @@ class PISEAttributes:
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
         self._solvers = entry[2]
+        assert (len(self._solvers) > 1)
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
