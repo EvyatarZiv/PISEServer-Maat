@@ -5,7 +5,7 @@ from copy import deepcopy
 import os
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('pise')
 
 TEMP_PATH = "./pise/tmp"
 INIT_STATE_PATH = "./pise/tmp/init_state"

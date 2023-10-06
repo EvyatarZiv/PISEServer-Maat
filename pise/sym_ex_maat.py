@@ -5,7 +5,7 @@ import logging
 import maat
 from pise import cache
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('pise')
 BASE_ADDR = 0x04000000
 LIB64_PATH = "./lib64"
 
@@ -92,6 +92,7 @@ class QueryRunner:
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
         self.set_membership_hooks()
         if self.probe_cache.has_contradiction(inputs):
+            logger.debug('Rejected by probing cache')
             return False, None, 0, 0, 0  # Input contains impossible continuation
         else:
             # If we haven't found anything in cache, just start from the beginning

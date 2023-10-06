@@ -2,7 +2,7 @@ import logging
 import maat
 from pise import sym_ex_helpers_maat, sym_ex_maat, entities
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('pise')
 
 ADDR_SIZE = 8
 NUM_SOL = 10
