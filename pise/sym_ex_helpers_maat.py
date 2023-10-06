@@ -56,6 +56,7 @@ class PISEAttributes:
 
     def cache_state(self, state, engine):
         global NCACHED
+        assert self.gen_solver().check()
         path = TEMP_PATH + f'/{NCACHED}'
         os.system(f'mkdir {path}')
         logger.debug(f'Caching state with rip={engine.cpu.rip}')
@@ -81,7 +82,7 @@ class PISEAttributes:
         entry[0].enqueue_state(engine)
         self.solver = entry[1]
         self._solvers = entry[2]
-        assert self._solvers != [] and self._debug_nstates_enq == 0
+        assert self._solvers != [] and self._debug_nstates_enq == 0 and self.gen_solver().check()
         self.idx = entry[3]
         engine.vars.update_from(self.make_model())
         logging.debug(f'Set to cached state @ {engine.cpu.rip}')
