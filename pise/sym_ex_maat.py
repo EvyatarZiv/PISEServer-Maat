@@ -46,7 +46,7 @@ class QueryRunner:
     def do_query_loop(self):
         res = False
         while True:
-            logger.debug(f'State dequeued')
+            logger.debug(f'State dequeued with rip {self.engine.cpu.rip}')
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
