@@ -17,7 +17,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s')
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
         self.probe_cache = cache.ProbingCache()
@@ -51,7 +51,6 @@ class QueryRunner:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
-                logger.debug(f'Exited @ {self.engine.cpu.rip}')
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     res = True
                 if not self.advance_state():
@@ -83,6 +82,7 @@ class QueryRunner:
             return []
         self.do_query_loop()
         self.probe_cache.insert(self.pise_attr.inputs, self.pise_attr.new_syms)
+        logger.debug(f'Probed {self.pise_attr.new_syms}')
         return [sym.__dict__ for sym in self.pise_attr.new_syms]
 
     def membership_step_by_step(self, inputs: list):
