@@ -17,7 +17,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s')
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
         self.probe_cache = cache.ProbingCache()
@@ -118,9 +118,6 @@ class QueryRunner:
         self.set_membership_hooks()
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
-
-        if len(inputs) > 2:
-            exit(0)
 
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
