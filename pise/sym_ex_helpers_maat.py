@@ -189,6 +189,7 @@ class PISEAttributes:
             if not self.solver.check():
                 logger.debug(f'Popped branch @ {engine.cpu.rip}')
                 self.pop_engine_state(engine)
+                logger.debug(f'Continuing @ {engine.cpu.rip}')
             else:
                 engine.vars.update_from(self.make_model())
                 logger.debug(f'Inverse of branch @ {engine.cpu.rip} stored')
