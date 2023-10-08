@@ -117,7 +117,7 @@ class PISEAttributes:
         self.solver.check()
         return self.solver.get_model()
 
-    def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False) -> None:
+    def save_engine_state(self, engine: maat.MaatEngine, stash_for_probing=False, with_conds=None) -> None:
         assert self._solvers != []
         manager: maat.SimpleStateManager = self.state_manager if not stash_for_probing else self.probing_stash
         solvers = self._solvers if not stash_for_probing else self._probing_solvers
@@ -125,6 +125,9 @@ class PISEAttributes:
         sl = self.gen_conditions(stash_for_probing)
 
         self._debug_nstates_enq += not stash_for_probing
+
+        if with_conds is not None:
+            sl += with_conds
 
         if stash_for_probing:
             self._probing_solvers = [sl] + self._probing_solvers

@@ -105,7 +105,8 @@ class StrcmpHook(LibcCallSite):
             return maat.ACTION.HALT"""
         CallSite.do_ret_from_plt(engine)
         if engine.mem.read(s1_ptr.as_uint(), 1).is_concolic(engine.vars):
-            pise_attr.save_engine_state(engine)
+            logger.debug(f'STRCMP conds are {pise_attr._solvers[-1]}')
+            pise_attr.save_engine_state(engine, with_conds=[engine.cpu.rax == 0])
             idx = 0
             while True:
                 ch = engine.mem.read(s2_ptr.as_uint(engine.vars) + idx, 1)
@@ -127,6 +128,7 @@ class StrcmpHook(LibcCallSite):
                 pise_attr.pop_engine_state(engine)
             else:
                 logger.debug("STRCMP SAT")"""
+        logger.debug(f'STRCMP new conds are {pise_attr._solvers[-1]}')
         return maat.ACTION.CONTINUE
 
     def make_callback(self, pise_attr: sym_ex_helpers_maat.PISEAttributes = None):
