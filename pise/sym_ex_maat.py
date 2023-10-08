@@ -46,13 +46,12 @@ class QueryRunner:
     def do_query_loop(self):
         res = False
         while True:
-            logger.debug(f'State dequeued with rip {self.engine.cpu.rip}')
+            logger.debug(f'State dequeued @ {self.engine.cpu.rip}')
             """if self.pise_attr.probing:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
                 logger.debug(f'Exited @ {self.engine.cpu.rip}')
-                self.engine.settings.log_insts = False
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     res = True
                 if not self.advance_state():

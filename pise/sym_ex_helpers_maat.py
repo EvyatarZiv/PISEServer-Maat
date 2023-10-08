@@ -187,10 +187,11 @@ class PISEAttributes:
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             if not self.solver.check():
-                logger.debug(f'Popped branch @ {engine.cpu.rip}')
+                return maat.ACTION.HALT
+                """logger.debug(f'Popped branch @ {engine.cpu.rip}')
                 self.pop_engine_state(engine)
                 logger.debug(f'Continuing @ {engine.cpu.rip}')
-                engine.settings.log_insts = True
+                engine.settings.log_insts = True"""
             else:
                 engine.vars.update_from(self.make_model())
                 logger.debug(f'Inverse of branch @ {engine.cpu.rip} stored')
