@@ -17,7 +17,7 @@ class QueryRunner:
         self.pise_attr = None
         self.mode = None
         self.engine.load(self.file, maat.BIN.ELF64, libdirs=[LIB64_PATH], load_interp=True, base=BASE_ADDR)
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s')
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
         self.callsites_to_monitor = callsites_to_monitor
         self.addr_main = addr_main
         self.probe_cache = cache.ProbingCache()
@@ -90,7 +90,7 @@ class QueryRunner:
         :param inputs: List of MessageTypeSymbol objects
         """
         global NQUERIES
-        logger.debug(f'Performed {NQUERIES} queries')
+        logger.info(f'Performed {NQUERIES} queries')
         NQUERIES += 1
         logger.debug('Performing membership, step by step')
         logger.debug('Query: %s' % inputs)
