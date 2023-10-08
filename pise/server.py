@@ -33,12 +33,12 @@ class Server:
         logger.debug(str(inputs) + " //// " + str(answer))
         query.set_result(MembershipQueryResult(answer, probe_result))
         return {
-                   'membership_time': ms_time,
-                   'pre_probe_time': pre_probe_time if pre_probe_time is not None else 0,
-                   'probe_time': probe_time if probe_time is not None else 0,
-                   'answer': answer,
-                   'probe_result': probe_result
-               }
+            'membership_time': ms_time,
+            'pre_probe_time': pre_probe_time if pre_probe_time is not None else 0,
+            'probe_time': probe_time if probe_time is not None else 0,
+            'answer': answer,
+            'probe_result': probe_result
+        }
 
     def handle_membership_batch(self, query_json):
         queries = [MembershipQuery.from_json(query) for query in query_json['queries']]
@@ -72,6 +72,7 @@ class Server:
 
     def listen(self):
         self.sock = socket.socket()
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(('0.0.0.0', self.port))
         self.sock.listen()
         try:
