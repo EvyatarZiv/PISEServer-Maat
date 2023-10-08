@@ -198,8 +198,9 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
-        logger.debug(f'Send hooked @ {engine.cpu.rip}')
         if pise_attr.probing:
+            LibcCallSite.do_ret_from_plt(engine)
+            logger.debug(f'Send hooked while probing ret @ {engine.cpu.rip}')
             if not pise_attr.pending_probe:
                 # logger.debug('Adding SEND symbol')
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
@@ -209,7 +210,6 @@ class SendHook(NetHook):
                 sym = entities.MessageTypeSymbol(SendHook.SEND_STRING, extract_name(predicate), predicate)
                 pise_attr.new_syms.append(sym)
                 # logger.debug(sym.__dict__)
-                # LibcCallSite.do_ret_from_plt(engine)
                 return maat.ACTION.HALT
             # logger.debug('Recv next callback @ send')
             self.probe_recv_at_next_callback(engine, pise_attr)
