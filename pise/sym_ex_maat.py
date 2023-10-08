@@ -118,6 +118,7 @@ class QueryRunner:
                               callbacks=[self.pise_attr.make_branch_callback()])
 
         logger.info(inputs)
+        exit(0)
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         if len(inputs) == 0:
