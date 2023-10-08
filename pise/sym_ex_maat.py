@@ -51,12 +51,14 @@ class QueryRunner:
                 logger.debug(self.engine.cpu.rip)"""
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
+                logger.debug(f'Exited @ {self.engine.cpu.rip}')
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     res = True
                 if not self.advance_state():
                     return res
                 continue
             elif stop_res == maat.STOP.HOOK:
+                logger.debug(f'Hooked @ {self.engine.cpu.rip}')
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     logger.debug("MAAT query is true")
                     self.pise_attr.cache_state(self.pise_attr.inputs, self.engine)
