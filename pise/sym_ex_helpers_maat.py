@@ -102,11 +102,7 @@ class PISEAttributes:
         if not self._probing_solvers and for_probing:
             return []
         cnds = self._probing_solvers[-1] if for_probing else self._solvers[-1]"""
-        cnds = self._solvers[-1]
-        sl = []
-        for cnd in cnds:
-            sl.append(cnd)
-        return sl
+        return self._solvers[-1].copy()
 
     def add_constraint(self, cond: maat.Constraint) -> None:
         self._solvers[-1].append(cond)
