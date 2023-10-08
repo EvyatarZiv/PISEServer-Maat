@@ -124,6 +124,7 @@ class PISEAttributes:
         manager.enqueue_state(engine)
         sl = self.gen_conditions(stash_for_probing)
 
+        logger.debug(f'Conds are {sl}')
         self._debug_nstates_enq += not stash_for_probing
 
         if with_conds is not None:
