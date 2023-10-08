@@ -177,7 +177,9 @@ class NetHook:
             offset = int(offset)
             value = int(value)
             if offset >= length:
-                return maat.ACTION.HALT
+                logger.debug(f'Faulty offset in nethook @ {engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)}')
+                logger.debug(f'Offset is {offset}, max length is {length}')
+                exit(0)
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
 
             pise_attr.add_constraint(symb_byte == value)
@@ -248,6 +250,7 @@ class RecvHook(NetHook):
                 buffer_arg, length_arg = self.callsite_handler.extract_arguments(engine)
                 pise_attr.pending_buffer_addr = buffer_arg.as_uint(pise_attr.make_model())
                 pise_attr.pending_buffer_length = length_arg.as_uint(pise_attr.make_model())
+                logger.debug(f'RECV probe buffer length {pise_attr.pending_buffer_length}')
                 engine.mem.make_concolic(pise_attr.pending_buffer_addr, pise_attr.pending_buffer_length, 1,
                                          "msg_%d" % pise_attr.idx)
                 LibcCallSite.do_ret_from_plt(engine)
