@@ -52,6 +52,7 @@ class QueryRunner:
             stop_res = self.engine.run()
             if stop_res == maat.STOP.EXIT:
                 logger.debug(f'Exited @ {self.engine.cpu.rip}')
+                self.engine.settings.log_insts = False
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     res = True
                 if not self.advance_state():

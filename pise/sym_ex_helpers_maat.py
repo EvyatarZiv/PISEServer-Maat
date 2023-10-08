@@ -190,6 +190,7 @@ class PISEAttributes:
                 logger.debug(f'Popped branch @ {engine.cpu.rip}')
                 self.pop_engine_state(engine)
                 logger.debug(f'Continuing @ {engine.cpu.rip}')
+                engine.settings.log_insts = True
             else:
                 engine.vars.update_from(self.make_model())
                 logger.debug(f'Inverse of branch @ {engine.cpu.rip} stored')
