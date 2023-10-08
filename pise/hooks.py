@@ -198,6 +198,7 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        logger.debug(f'Send hooked @ {engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)}')
         if pise_attr.probing:
             LibcCallSite.do_ret_from_plt(engine)
             logger.debug(f'Send hooked while probing ret @ {engine.cpu.rip}')
