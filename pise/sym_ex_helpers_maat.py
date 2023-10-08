@@ -97,12 +97,13 @@ class PISEAttributes:
         return sl
 
     def gen_conditions(self, for_probing=False):
-        if not self._solvers and not for_probing:
+        """if not self._solvers and not for_probing:
             return []
         if not self._probing_solvers and for_probing:
             return []
+        cnds = self._probing_solvers[-1] if for_probing else self._solvers[-1]"""
+        cnds = self._solvers[-1]
         sl = []
-        cnds = self._probing_solvers[-1] if for_probing else self._solvers[-1]
         for cnd in cnds:
             sl.append(cnd)
         return sl
