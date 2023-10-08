@@ -180,7 +180,6 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
-            logger.debug(f'{engine.cpu.rip}')
             # logger.debug('Invert saved')
             self.save_engine_state(engine)
             assert len(self._solvers) > 1
@@ -191,6 +190,7 @@ class PISEAttributes:
                 self.pop_engine_state(engine)
             else:
                 engine.vars.update_from(self.make_model())
+                logger.debug(f'Inverse of branch @ {engine.cpu.rip} stored')
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
