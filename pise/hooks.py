@@ -106,7 +106,10 @@ class StrcmpHook(LibcCallSite):
         CallSite.do_ret_from_plt(engine)
         if engine.mem.read(s1_ptr.as_uint(), 1).is_concolic(engine.vars):
             logger.debug(f'STRCMP conds are {pise_attr._solvers[-1]}')
-            pise_attr.save_engine_state(engine, with_conds=[engine.cpu.rax == 1])
+            sl = pise_attr.gen_solver()
+            sl.add(engine.cpu.rax == 1)
+            if sl.check():
+                pise_attr.save_engine_state(engine, with_conds=[engine.cpu.rax == 1])
             idx = 0
             while True:
                 ch = engine.mem.read(s2_ptr.as_uint(engine.vars) + idx, 1)
