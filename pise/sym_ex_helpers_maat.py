@@ -187,6 +187,7 @@ class PISEAttributes:
             self._solvers[-1].append(cond)
             self.solver.add(cond)
             if not self.solver.check():
+                logger.debug(f'Popped branch @ {engine.cpu.rip}')
                 self.pop_engine_state(engine)
             else:
                 engine.vars.update_from(self.make_model())
