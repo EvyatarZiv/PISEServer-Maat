@@ -42,11 +42,11 @@ class Gh0stRecvHook(hooks.CallSite):
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
     query_runner = sym_ex_maat.QueryRunner('examples/ghost/gh0st_like',
-                                           [gh0st_rat_inference_maat.Gh0stRecvHook(),
-                                            gh0st_rat_inference_maat.Gh0stSendHook(),
-                                            hooks.ConnectHook(gh0st_rat_inference_maat.CONNECT_OFFSET),
-                                            hooks.SocketHook(gh0st_rat_inference_maat.SOCKET_OFFSET)],
-                                           gh0st_rat_inference_maat.MAIN_OFFSET)
+                                           [Gh0stRecvHook(),
+                                            Gh0stSendHook(),
+                                            hooks.ConnectHook(CONNECT_OFFSET),
+                                            hooks.SocketHook(SOCKET_OFFSET)],
+                                           MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
 
