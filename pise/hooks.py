@@ -198,6 +198,7 @@ class SendHook(NetHook):
         self.type = NetHook.SEND
 
     def execute_callback(self, engine: maat.MaatEngine, pise_attr: sym_ex_helpers_maat.PISEAttributes):
+        logger.debug(f'Send hooked @ {engine.cpu.rip}')
         if pise_attr.probing:
             if not pise_attr.pending_probe:
                 # logger.debug('Adding SEND symbol')
