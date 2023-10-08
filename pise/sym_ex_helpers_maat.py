@@ -180,6 +180,7 @@ class PISEAttributes:
         sl = self.gen_solver()
         sl.add(cond.invert())
         if sl.check():
+            logger.debug(f'{engine.cpu.rip}')
             # logger.debug('Invert saved')
             self.save_engine_state(engine)
             assert len(self._solvers) > 1

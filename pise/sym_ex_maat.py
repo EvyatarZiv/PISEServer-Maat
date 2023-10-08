@@ -114,6 +114,10 @@ class QueryRunner:
         self.set_membership_hooks()
         self.engine.hooks.add(maat.EVENT.BRANCH, maat.WHEN.BEFORE,
                               callbacks=[self.pise_attr.make_branch_callback()])
+
+        if len(inputs) > 1:
+            exit(0)
+
         if len(inputs) > 0 and not self.do_monitoring():
             return False, None, 0, 0, 0  # Membership is false
         if len(inputs) == 0:
