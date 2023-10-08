@@ -78,6 +78,7 @@ class QueryRunner:
         logger.debug('Starting probing')
         self.pise_attr.new_syms = []
         self.pise_attr.begin_probing()
+        logger.debug(f'Cond lists are: {self.pise_attr._solvers}')
         if not self.advance_state():
             return []
         self.do_query_loop()
