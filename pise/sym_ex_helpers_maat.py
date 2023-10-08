@@ -191,6 +191,7 @@ class PISEAttributes:
             else:
                 engine.vars.update_from(self.make_model())
                 logger.debug(f'Inverse of branch @ {engine.cpu.rip} stored')
+                logger.debug(f'Conds are {self._solvers[-1]}')
         return maat.ACTION.CONTINUE
 
     def make_branch_callback(self):
