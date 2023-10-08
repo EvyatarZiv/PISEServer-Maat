@@ -3,7 +3,7 @@ import logging
 from pise import sym_ex_maat, server, hooks, sym_ex_helpers_maat
 import maat
 
-BINARY_PATH = './examples/toy_example/toy_example'
+BINARY_PATH = './examples/ghost/gh0st_like'
 
 MAIN_OFFSET = 0x2556
 SOCKET_OFFSET = 0x11b4
@@ -42,7 +42,11 @@ class Gh0stRecvHook(hooks.CallSite):
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
     query_runner = sym_ex_maat.QueryRunner('examples/ghost/gh0st_like',
-                                           [Gh0stSendHook(), Gh0stRecvHook()], MAIN_OFFSET)
+                                           [gh0st_rat_inference_maat.Gh0stRecvHook(),
+                                            gh0st_rat_inference_maat.Gh0stSendHook(),
+                                            hooks.ConnectHook(gh0st_rat_inference_maat.CONNECT_OFFSET),
+                                            hooks.SocketHook(gh0st_rat_inference_maat.SOCKET_OFFSET)],
+                                           gh0st_rat_inference_maat.MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
 

@@ -52,7 +52,7 @@ class ToyScanfHook(hooks.LibcCallSite):
 
 
 def main():
-    logging.getLogger('pise').setLevel(logging.DEBUG)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
     # logging.getLogger('angr').setLevel(logging.INFO)
     query_runner = sym_ex_maat.QueryRunner(BINARY_PATH,
                                            [ToySendHook(),
