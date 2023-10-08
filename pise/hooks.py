@@ -183,10 +183,10 @@ class NetHook:
         for (offset, value) in message_type.predicate.items():
             offset = int(offset)
             value = int(value)
-            if offset >= length:
+            """if offset >= length:
                 logger.debug(f'Faulty offset in nethook @ {engine.mem.read(engine.cpu.rsp.as_uint(), ADDR_SIZE)}')
                 logger.debug(f'Offset is {offset}, max length is {length}')
-                exit(0)
+                exit(0)"""
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
 
             pise_attr.add_constraint(symb_byte == value)
