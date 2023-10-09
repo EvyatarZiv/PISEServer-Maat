@@ -40,7 +40,7 @@ class Gh0stRecvHook(hooks.CallSite):
 
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
-    query_runner = sym_ex_maat.QueryRunner('examples/ghost/gh0st_like',
+    query_runner = sym_ex_maat.QueryRunner(BINARY_PATH,
                                            [Gh0stRecvHook(),
                                             Gh0stSendHook(),
                                             hooks.ConnectHook(CONNECT_OFFSET),
