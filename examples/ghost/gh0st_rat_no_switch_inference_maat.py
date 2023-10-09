@@ -3,7 +3,7 @@ import logging
 from pise import sym_ex_maat, server, hooks, sym_ex_helpers_maat
 import maat
 
-BINARY_PATH = './examples/toy_example/toy_example'
+BINARY_PATH = './examples/ghost/gh0st_like_no_switch'
 
 MAIN_OFFSET = 0x2581
 SOCKET_OFFSET = 0x11b0
