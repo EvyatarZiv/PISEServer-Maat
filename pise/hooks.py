@@ -190,7 +190,7 @@ class NetHook:
             symb_byte = engine.mem.read(buffer_addr + offset, 1)
 
             pise_attr.add_constraint(symb_byte == value)
-        logger.debug(f'Conds are {pise_attr._solvers[-1]}')
+        #logger.debug(f'Conds are {pise_attr._solvers[-1]}')
         res = pise_attr.make_model()
         if res is None:
             return maat.ACTION.HALT

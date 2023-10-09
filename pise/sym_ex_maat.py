@@ -60,7 +60,7 @@ class QueryRunner:
                 logger.debug(f'Hooked @ {self.engine.cpu.rip}')
                 if not self.pise_attr.probing and self.pise_attr.idx == len(self.pise_attr.inputs):
                     logger.debug("MAAT query is true")
-                    logger.debug(f'Conds are {self.pise_attr._solvers[-1]}')
+                    #logger.debug(f'Conds are {self.pise_attr._solvers[-1]}')
                     self.pise_attr.cache_state(self.pise_attr.inputs, self.engine)
                     self.pise_attr.save_engine_state(self.engine, stash_for_probing=True)  # Membership is true
                     res = True
