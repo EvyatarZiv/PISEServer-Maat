@@ -11,6 +11,10 @@ CONNECT_OFFSET = 0x11a4
 SCANF_OFFSET = 0x11e4
 RECV_OFFSET = 0x1104
 SEND_OFFSET = 0x1144
+PRINTF_OFFSET = 0x1150
+PUTS_OFFSET = 0x1110
+CANARY_CHECK_OFFSET = 0x1120
+
 
 
 class Gh0stSendHook(hooks.CallSite):
@@ -41,11 +45,15 @@ class Gh0stRecvHook(hooks.CallSite):
 
 def main():
     logging.getLogger('pise').setLevel(logging.DEBUG)
-    query_runner = sym_ex_maat.QueryRunner('examples/ghost/gh0st_like',
+    query_runner = sym_ex_maat.QueryRunner(BINARY_PATH,
                                            [Gh0stRecvHook(),
                                             Gh0stSendHook(),
                                             hooks.ConnectHook(CONNECT_OFFSET),
-                                            hooks.SocketHook(SOCKET_OFFSET)],
+                                            hooks.SocketHook(SOCKET_OFFSET),
+                                            hooks.LibcCallSite(PRINTF_OFFSET),
+                                            hooks.LibcCallSite(PUTS_OFFSET),
+                                            hooks.LibcCallSite(CANARY_CHECK_OFFSET)
+                                            ],
                                            MAIN_OFFSET)
     s = server.Server(query_runner)
     s.listen()
