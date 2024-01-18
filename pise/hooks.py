@@ -197,6 +197,7 @@ class NetHook:
         pise_attr.idx += 1
         LibcCallSite.do_ret_from_plt(engine)
         engine.vars.update_from(res)
+        pise_attr.cache_state(pise_attr.inputs[:pise_attr.idx], engine)
         return maat.ACTION.CONTINUE if not NetHook.check_monitoring_complete(pise_attr) else maat.ACTION.HALT
 
 

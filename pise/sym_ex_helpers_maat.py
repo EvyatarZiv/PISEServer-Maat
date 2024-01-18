@@ -57,6 +57,8 @@ class PISEAttributes:
     def cache_state(self, state, engine):
         global NCACHED
         assert self.gen_solver().check()
+        if tuple(state) in PISEAttributes.state_cache_map.keys():
+            return
         path = TEMP_PATH + f'/{NCACHED}'
         os.system(f'mkdir {path}')
         logger.debug(f'Caching state with rip={engine.cpu.rip}')
@@ -102,7 +104,7 @@ class PISEAttributes:
         if not self._probing_solvers and for_probing:
             return []
         cnds = self._probing_solvers[-1] if for_probing else self._solvers[-1]"""
-        return self._solvers[-1].copy()
+        # return self._solvers[-1].copy()
 
     def add_constraint(self, cond: maat.Constraint) -> None:
         self._solvers[-1].append(cond)
